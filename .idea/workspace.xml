@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7d1717dc-8cd1-4147-852e-c11cf2f78cbe" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/bawnorton/autocodec/AlternateCodec.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/processor/AutoCodecProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/processor/AutoCodecProcessor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/NodeVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/NodeVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ContextHolder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ContextHolder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ProcessingContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ProcessingContext.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/resources/AlternateCodec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/AlternateCodec.java" afterDir="false" />
-    </list>
+    <list default="true" id="7d1717dc-8cd1-4147-852e-c11cf2f78cbe" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -102,7 +89,7 @@
     "Gradle.AutoCodec [publishToMavenLocal].executor": "Run",
     "Gradle.AutoCodec:app [build].executor": "Run",
     "Gradle.AutoCodecTests.printClasspath.executor": "Run",
-    "Gradle.AutoCodecTests.testAlternateCodec.executor": "Debug",
+    "Gradle.AutoCodecTests.testAlternateCodec.executor": "Run",
     "Gradle.AutoCodecTests.testAlternateRecord.executor": "Run",
     "Gradle.AutoCodecTests.testAutoCodec (1).executor": "Run",
     "Gradle.AutoCodecTests.testAutoCodec.executor": "Run",
@@ -135,7 +122,7 @@
       <recent name="com.bawnorton.autocodec" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.AutoCodec [publishToMavenLocal]">
+  <component name="RunManager" selected="Gradle.AutoCodecTests.testAlternateCodec">
     <configuration name="AutoCodec [publishToMavenLocal]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -263,10 +250,10 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.AutoCodec [publishToMavenLocal]" />
-        <item itemvalue="Gradle.AutoCodecTests.testSimpleRecord" />
-        <item itemvalue="Gradle.AutoCodecTests.testEmptyRecord" />
         <item itemvalue="Gradle.AutoCodecTests.testAlternateCodec" />
+        <item itemvalue="Gradle.AutoCodecTests.testSimpleRecord" />
+        <item itemvalue="Gradle.AutoCodec [publishToMavenLocal]" />
+        <item itemvalue="Gradle.AutoCodecTests.testEmptyRecord" />
         <item itemvalue="Gradle.AutoCodecTests.testAlternateRecord" />
       </list>
     </recent_temporary>
@@ -281,7 +268,7 @@
       <updated>1717428444631</updated>
       <workItem from="1717428445631" duration="8868000" />
       <workItem from="1717439107226" duration="1306000" />
-      <workItem from="1717440423390" duration="25936000" />
+      <workItem from="1717440423390" duration="26348000" />
     </task>
     <servers />
   </component>

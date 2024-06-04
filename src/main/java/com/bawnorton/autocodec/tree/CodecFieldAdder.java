@@ -205,7 +205,7 @@ public class CodecFieldAdder extends NodeVisitor {
                 .build();
 
         VariableDeclNode codecNode = VariableDeclNode.builder(holder.getContext())
-                .modifiers(Flags.PUBLIC | Flags.STATIC)
+                .modifiers(Flags.PUBLIC | Flags.STATIC | Flags.FINAL)
                 .name(codecFieldName)
                 .type("Codec")
                 .genericParam(classDeclNode.getName())

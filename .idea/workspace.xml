@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7d1717dc-8cd1-4147-852e-c11cf2f78cbe" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/Ignore.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/Optional.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/AnnotationNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ImportNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/processor/AutoCodecProcessor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/NodeVisitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ContextHolder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ProcessingContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/bawnorton/autocodec/AutoCodecTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/resources/AlternateCodec.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/resources/EmptyRecord.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/bawnorton/autocodec/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/bawnorton/autocodec/TestRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/TestRecord.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processor/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/processor/src/main/java/com/bawnorton/autocodec/AutoCodec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/AutoCodec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processor/src/main/java/com/bawnorton/autocodec/AutoCodecProcessor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/app">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/processor">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AutoCodec" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AutoCodec" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AutoCodec" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AutoCodec" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="publishing" type="c8890929:TasksNode$1" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="module-info" />
+        <option value="AnnotationType" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2hNJ8hApNBLmfeWl0dYZ8Uyqbtu" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.AutoCodec [build].executor": "Run",
+    "Gradle.AutoCodec [clean].executor": "Run",
+    "Gradle.AutoCodec [publishToMavenLocal].executor": "Run",
+    "Gradle.AutoCodec:app [build].executor": "Run",
+    "Gradle.AutoCodecTests.printClasspath.executor": "Run",
+    "Gradle.AutoCodecTests.testAlternateCodec.executor": "Debug",
+    "Gradle.AutoCodecTests.testAlternateRecord.executor": "Run",
+    "Gradle.AutoCodecTests.testAutoCodec (1).executor": "Run",
+    "Gradle.AutoCodecTests.testAutoCodec.executor": "Run",
+    "Gradle.AutoCodecTests.testEmptyRecord.executor": "Run",
+    "Gradle.AutoCodecTests.testSimpleRecord.executor": "Debug",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.23375",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/processor/src" />
+      <recent name="$PROJECT_DIR$/processor/src/main/java" />
+      <recent name="$PROJECT_DIR$/processor/src/main" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.bawnorton.autocodec" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.AutoCodecTests.testAlternateCodec">
+    <configuration name="AutoCodecTests.printClasspath" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;com.bawnorton.autocodec.AutoCodecTests.printClasspath&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="AutoCodecTests.testAlternateCodec" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;com.bawnorton.autocodec.AutoCodecTests.testAlternateCodec&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="AutoCodecTests.testAlternateRecord" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;com.bawnorton.autocodec.AutoCodecTests.testAlternateRecord&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="AutoCodecTests.testEmptyRecord" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;com.bawnorton.autocodec.AutoCodecTests.testEmptyRecord&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="AutoCodecTests.testSimpleRecord" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;com.bawnorton.autocodec.AutoCodecTests.testSimpleRecord&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Gradle.AutoCodecTests.printClasspath" />
+      <item itemvalue="Gradle.AutoCodecTests.testAlternateCodec" />
+      <item itemvalue="Gradle.AutoCodecTests.testAlternateRecord" />
+      <item itemvalue="Gradle.AutoCodecTests.testEmptyRecord" />
+      <item itemvalue="Gradle.AutoCodecTests.testSimpleRecord" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.AutoCodecTests.testAlternateCodec" />
+        <item itemvalue="Gradle.AutoCodecTests.testAlternateRecord" />
+        <item itemvalue="Gradle.AutoCodecTests.testSimpleRecord" />
+        <item itemvalue="Gradle.AutoCodecTests.testEmptyRecord" />
+        <item itemvalue="Gradle.AutoCodecTests.printClasspath" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7d1717dc-8cd1-4147-852e-c11cf2f78cbe" name="Changes" comment="" />
+      <created>1717428444631</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1717428444631</updated>
+      <workItem from="1717428445631" duration="8868000" />
+      <workItem from="1717439107226" duration="1306000" />
+      <workItem from="1717440423390" duration="18452000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java</url>
+          <line>90</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="com.sun.tools.javac.tree.JCTree$JCTypeApply" memberName="type" />
+        <PinnedItemInfo parentTag="com.sun.tools.javac.tree.JCTree$JCCompilationUnit" memberName="defs" />
+      </pinned-members>
+    </pin-to-top-manager>
+    <watches-manager>
+      <configuration name="GradleRunConfiguration">
+        <watch expression="typeEnvs.map.entrySet().toArray()[0]" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>

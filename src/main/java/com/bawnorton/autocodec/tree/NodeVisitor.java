@@ -18,9 +18,6 @@ public abstract class NodeVisitor extends TreeTranslator {
     protected void visitClassDeclNode(ClassDeclNode classDeclNode) {
     }
 
-    protected void visitImportNode(ImportNode importNode) {
-    }
-
     protected void visitCompilationUnitNode(CompilationUnitNode compilationUnitNode) {
     }
 
@@ -29,13 +26,6 @@ public abstract class NodeVisitor extends TreeTranslator {
         ClassDeclNode classDeclNode = new ClassDeclNode(tree);
         visitClassDeclNode(classDeclNode);
         super.visitClassDef(classDeclNode.getTree());
-    }
-
-    @Override
-    public final void visitImport(JCTree.JCImport tree) {
-        ImportNode importNode = new ImportNode(tree);
-        visitImportNode(importNode);
-        super.visitImport(importNode.getTree());
     }
 
     @Override

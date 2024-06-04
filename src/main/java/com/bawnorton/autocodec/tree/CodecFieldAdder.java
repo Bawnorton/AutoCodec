@@ -2,17 +2,16 @@ package com.bawnorton.autocodec.tree;
 
 import com.bawnorton.autocodec.Ignore;
 import com.bawnorton.autocodec.Optional;
+import com.bawnorton.autocodec.codec.CodecLookup;
 import com.bawnorton.autocodec.codec.CodecReference;
 import com.bawnorton.autocodec.info.RecordInfo;
 import com.bawnorton.autocodec.nodes.*;
-import com.bawnorton.autocodec.codec.CodecLookup;
 import com.bawnorton.autocodec.util.IncludedField;
 import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.source.tree.MemberReferenceTree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class CodecFieldAdder extends NodeVisitor {
@@ -91,7 +90,7 @@ public class CodecFieldAdder extends NodeVisitor {
     private VariableDeclNode createCodecField(ClassDeclNode classDeclNode) {
         List<CodecReference> includedCodecs = new ArrayList<>();
         List<IncludedField> includedFields = getIncludedFields(classDeclNode);
-        findOrCreateConstructor(classDeclNode, includedFields);
+        createConstructorIfMissing(classDeclNode, includedFields);
 
         for (IncludedField includedField : includedFields) {
             VariableDeclNode field = includedField.variableDeclNode();
@@ -200,36 +199,13 @@ public class CodecFieldAdder extends NodeVisitor {
         return codecNode;
     }
 
-    private void ensureFieldOrder(MethodDeclNode constructor, List<IncludedField> includedFields) {
-        List<VariableDeclNode> parameters = constructor.getParameters();
-        List<IncludedField> reordered = new ArrayList<>();
-        for (VariableDeclNode parameter : parameters) {
-            for (IncludedField includedField : includedFields) {
-                VariableDeclNode field = includedField.variableDeclNode();
-                String fieldName = field.getName();
-                String parameterName = parameter.getName();
-
-                Type fieldType = field.getType();
-                Type parameterType = parameter.getType();
-                if (fieldName.equals(parameterName) && fieldType.equals(parameterType)) {
-                    reordered.add(includedField);
-                    break;
-                }
-            }
-        }
-        includedFields.clear();
-        includedFields.addAll(reordered);
-    }
-
-    private void findOrCreateConstructor(ClassDeclNode classDeclNode, List<IncludedField> includedFields) {
+    private void createConstructorIfMissing(ClassDeclNode classDeclNode, List<IncludedField> includedFields) {
         MethodDeclNode constructor = findConstructor(classDeclNode, includedFields);
-        if(classDeclNode.isRecord()) {
-            if(constructor == null) {
+        if(constructor == null) {
+            if(classDeclNode.isRecord()) {
                 RecordInfo recordInfo = new RecordInfo(classDeclNode);
                 constructor = createRecordConstructor(recordInfo, includedFields);
                 classDeclNode.addMethod(constructor);
-            } else {
-                ensureFieldOrder(constructor, includedFields);
             }
         }
     }

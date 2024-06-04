@@ -115,6 +115,10 @@ public final class VariableDeclNode extends TreeNode {
             return this;
         }
 
+        public Builder initialValue(ExpressionNode initializer) {
+            return initialValue(initializer.getTree());
+        }
+
         public VariableDeclNode build() {
             if (name == null) throw new IllegalStateException("Name must be set");
 
@@ -126,7 +130,10 @@ public final class VariableDeclNode extends TreeNode {
             } else if (genericParams == null && typeName != null) {
                 type = treeMaker().Ident(typeName);
             } else if (typeName != null) {
-                List<JCTree.JCExpression> typeArgs = genericParams.stream().map(treeMaker()::Ident).collect(List::nil, List::append, List::appendList);
+                List<JCTree.JCExpression> typeArgs = List.nil();
+                for (Name genericParam : genericParams) {
+                    typeArgs = typeArgs.append(treeMaker().Ident(genericParam));
+                }
                 type = treeMaker().TypeApply(treeMaker().Ident(typeName), typeArgs);
             } else {
                 throw new IllegalStateException("Type must be set");

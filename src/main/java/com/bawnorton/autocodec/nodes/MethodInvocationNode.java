@@ -4,6 +4,7 @@ import com.bawnorton.autocodec.util.ContextHolder;
 import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.Name;
 
 public final class MethodInvocationNode extends ExpressionNode {
     private final JCTree.JCMethodInvocation methodInvocation;
@@ -46,12 +47,20 @@ public final class MethodInvocationNode extends ExpressionNode {
             return this;
         }
 
+        public Builder argument(Name name) {
+            return argument(context.treeMaker().Ident(name));
+        }
+
+        public Builder argument(String name) {
+            return argument(context.names().fromString(name));
+        }
+
         public Builder argument(ExpressionNode argument) {
             return argument(argument.getTree());
         }
 
         public MethodInvocationNode build() {
-            JCTree.JCMethodInvocation methodInvocation = context.treeMaker().App(methodSelect, arguments);
+            JCTree.JCMethodInvocation methodInvocation = context.treeMaker().Apply(null, methodSelect, arguments);
             return new MethodInvocationNode(methodInvocation);
         }
     }

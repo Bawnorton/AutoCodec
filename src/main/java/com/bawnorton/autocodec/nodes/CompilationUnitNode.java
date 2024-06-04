@@ -7,7 +7,7 @@ import com.sun.tools.javac.util.List;
 // File
 public final class CompilationUnitNode extends TreeNode {
     private final JCTree.JCCompilationUnit compilationUnit;
-    private final List<ImportNode> imports;
+    private List<ImportNode> imports;
 
     public CompilationUnitNode(JCTree.JCCompilationUnit compilationUnit) {
         this.compilationUnit = compilationUnit;
@@ -32,7 +32,7 @@ public final class CompilationUnitNode extends TreeNode {
     }
 
     public void addImport(ImportNode importNode) {
-        imports.add(importNode);
+        imports = imports.prepend(importNode);
         compilationUnit.defs = compilationUnit.defs.prepend(importNode.getImport());
     }
 }

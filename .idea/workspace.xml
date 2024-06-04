@@ -5,20 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d1717dc-8cd1-4147-852e-c11cf2f78cbe" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ExpressionNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/FieldAccessNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/LambdaNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/LiteralNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MemberReferenceNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/TreeNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/CodecLookup.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/bawnorton/autocodec/AlternateCodec.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/AnnotationNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/AnnotationNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/processor/AutoCodecProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/processor/AutoCodecProcessor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/NodeVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/NodeVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ContextHolder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ContextHolder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ProcessingContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ProcessingContext.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/resources/AlternateCodec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/AlternateCodec.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,6 +77,7 @@
         <option value="module-info" />
         <option value="AnnotationType" />
         <option value="Class" />
+        <option value="Record" />
       </list>
     </option>
   </component>
@@ -108,7 +107,7 @@
     "Gradle.AutoCodecTests.testAutoCodec (1).executor": "Run",
     "Gradle.AutoCodecTests.testAutoCodec.executor": "Run",
     "Gradle.AutoCodecTests.testEmptyRecord.executor": "Run",
-    "Gradle.AutoCodecTests.testSimpleRecord.executor": "Debug",
+    "Gradle.AutoCodecTests.testSimpleRecord.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
@@ -136,29 +135,27 @@
       <recent name="com.bawnorton.autocodec" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.AutoCodecTests.testAlternateCodec">
-    <configuration name="AutoCodecTests.printClasspath" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.AutoCodec [publishToMavenLocal]">
+    <configuration name="AutoCodec [publishToMavenLocal]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
+        <option name="scriptParameters" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value=":test" />
-            <option value="--tests" />
-            <option value="&quot;com.bawnorton.autocodec.AutoCodecTests.printClasspath&quot;" />
+            <option value="publishToMavenLocal" />
           </list>
         </option>
         <option name="vmOptions" />
       </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
+      <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
     <configuration name="AutoCodecTests.testAlternateCodec" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -258,19 +255,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Gradle.AutoCodecTests.printClasspath" />
       <item itemvalue="Gradle.AutoCodecTests.testAlternateCodec" />
       <item itemvalue="Gradle.AutoCodecTests.testAlternateRecord" />
       <item itemvalue="Gradle.AutoCodecTests.testEmptyRecord" />
       <item itemvalue="Gradle.AutoCodecTests.testSimpleRecord" />
+      <item itemvalue="Gradle.AutoCodec [publishToMavenLocal]" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.AutoCodecTests.testAlternateCodec" />
-        <item itemvalue="Gradle.AutoCodecTests.testAlternateRecord" />
+        <item itemvalue="Gradle.AutoCodec [publishToMavenLocal]" />
         <item itemvalue="Gradle.AutoCodecTests.testSimpleRecord" />
         <item itemvalue="Gradle.AutoCodecTests.testEmptyRecord" />
-        <item itemvalue="Gradle.AutoCodecTests.printClasspath" />
+        <item itemvalue="Gradle.AutoCodecTests.testAlternateCodec" />
+        <item itemvalue="Gradle.AutoCodecTests.testAlternateRecord" />
       </list>
     </recent_temporary>
   </component>
@@ -284,7 +281,7 @@
       <updated>1717428444631</updated>
       <workItem from="1717428445631" duration="8868000" />
       <workItem from="1717439107226" duration="1306000" />
-      <workItem from="1717440423390" duration="22019000" />
+      <workItem from="1717440423390" duration="25936000" />
     </task>
     <servers />
   </component>
@@ -292,15 +289,6 @@
     <option name="version" value="3" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java</url>
-          <line>155</line>
-          <option name="timeStamp" value="39" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="com.sun.tools.javac.tree.JCTree$JCTypeApply" memberName="type" />

@@ -8,6 +8,8 @@ import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.source.tree.MemberReferenceTree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.util.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.Map;
 
 public class CodecFieldAdder extends NodeVisitor {
     private static final String CODEC_IMPORT = "com.mojang.serialization.Codec";
+    private static final String RECORD_CODEC_BUILDER_IMPORT = "com.mojang.serialization.codecs.RecordCodecBuilder";
     private static final int MAX_FIELDS = 16;
 
     private final String codecFieldName;
@@ -33,9 +36,48 @@ public class CodecFieldAdder extends NodeVisitor {
 
     @Override
     protected void visitCompilationUnitNode(CompilationUnitNode compilationUnitNode) {
-        if(hasCodecImport(compilationUnitNode)) return;
+        if(missingCodecImport(compilationUnitNode)) {
+            compilationUnitNode.addImport(createCodecImport());
+        }
+        if(missingRecordCodecBuilderImport(compilationUnitNode)) {
+            compilationUnitNode.addImport(createRecordCodecBuilderImport());
+        }
+    }
 
-        compilationUnitNode.addImport(createCodecImport());
+    private boolean missingCodecImport(CompilationUnitNode compilationUnitNode) {
+        List<ImportNode> imports = compilationUnitNode.getImports();
+        for (ImportNode importNode : imports) {
+            String importPath = importNode.getImportPath();
+            if (!importPath.equals(CODEC_IMPORT)) continue;
+
+            return false;
+        }
+        return true;
+    }
+
+    private ImportNode createCodecImport() {
+        return ImportNode.builder(holder.getContext())
+                .importPath(CODEC_IMPORT)
+                .isStatic(false)
+                .build();
+    }
+
+    private boolean missingRecordCodecBuilderImport(CompilationUnitNode compilationUnitNode) {
+        List<ImportNode> imports = compilationUnitNode.getImports();
+        for (ImportNode importNode : imports) {
+            String importPath = importNode.getImportPath();
+            if (!importPath.equals(RECORD_CODEC_BUILDER_IMPORT)) continue;
+
+            return false;
+        }
+        return true;
+    }
+
+    private ImportNode createRecordCodecBuilderImport() {
+        return ImportNode.builder(holder.getContext())
+                .importPath(RECORD_CODEC_BUILDER_IMPORT)
+                .isStatic(false)
+                .build();
     }
 
     private boolean cantAddCodecField(ClassDeclNode classDeclNode) {
@@ -62,42 +104,33 @@ public class CodecFieldAdder extends NodeVisitor {
         return false;
     }
 
-    private boolean hasCodecImport(CompilationUnitNode compilationUnitNode) {
-        List<ImportNode> imports = compilationUnitNode.getImports();
-        for (ImportNode importNode : imports) {
-            String importPath = importNode.getImportPath();
-            if (!importPath.equals(CODEC_IMPORT)) continue;
-
-            return true;
-        }
-        return false;
-    }
-
     private VariableDeclNode createCodecField(ClassDeclNode classDeclNode) {
         List<VariableDeclNode> fields = classDeclNode.getFields();
-        List<VariableDeclNode> included = new ArrayList<>();
-        List<VariableDeclNode> optional = new ArrayList<>();
+        List<Pair<VariableDeclNode, Boolean>> included = new ArrayList<>();
 
         for (VariableDeclNode field : fields) {
             if (field.isStatic()) continue;
             if (field.annotationPresent(Ignore.class)) continue;
 
             if (field.annotationPresent(Optional.class)) {
-                optional.add(field);
+                included.add(Pair.of(field, false));
             } else {
-                included.add(field);
+                included.add(Pair.of(field, true));
             }
         }
 
         Map<VariableDeclNode, MethodInvocationNode> includedCodecs = new HashMap<>();
-        for (VariableDeclNode includedField : included) {
+        for (Pair<VariableDeclNode, Boolean> includedField : included) {
+            VariableDeclNode field = includedField.fst;
+            boolean isRequired = includedField.snd;
+
             FieldAccessNode fieldOfReferenceNode = FieldAccessNode.builder(holder.getContext())
-                    .selected(CodecLookup.lookupCodec(holder.getContext(), includedField.getType()))
+                    .selected(CodecLookup.lookupCodec(holder.getContext(), field.getType()))
                     .name("fieldOf")
                     .build();
 
             LiteralNode literalFieldNameNode = LiteralNode.builder(holder.getContext())
-                    .value(includedField.getName())
+                    .value(field.getName())
                     .build();
 
             MethodInvocationNode fieldOfInvocationNode = MethodInvocationNode.builder(holder.getContext())
@@ -112,67 +145,73 @@ public class CodecFieldAdder extends NodeVisitor {
 
             MemberReferenceNode selfFieldReferenceNode = MemberReferenceNode.builder(holder.getContext())
                     .mode(MemberReferenceTree.ReferenceMode.INVOKE)
-                    .name(includedField.getName())
-                    .expression("instance")
+                    .name(field.getName())
+                    .expression(classDeclNode.getName())
                     .build();
 
             MethodInvocationNode forGetterInvocationNode = MethodInvocationNode.builder(holder.getContext())
                     .methodSelect(forGetterReferenceNode)
                     .argument(selfFieldReferenceNode)
                     .build();
+
+            includedCodecs.put(field, forGetterInvocationNode);
         }
 
-        FieldAccessNode createReferenceNode = FieldAccessNode.builder(holder.getContext())
-                .selected("RecordCodecBuilder")
-                .name("create")
-                .build();
-
-        FieldAccessNode implicitGroupReferenceNode = FieldAccessNode.builder(holder.getContext())
+        FieldAccessNode instanceGroupReferenceNode = FieldAccessNode.builder(holder.getContext())
                 .selected("instance")
                 .name("group")
                 .build();
 
+        MethodInvocationNode.Builder instanceGroupInvocationNodeBuilder = MethodInvocationNode.builder(holder.getContext())
+                .methodSelect(instanceGroupReferenceNode);
+        includedCodecs.values().forEach(instanceGroupInvocationNodeBuilder::argument);
+        MethodInvocationNode instanceGroupInvocationNode = instanceGroupInvocationNodeBuilder.build();
 
-        MethodInvocationNode groupContentInvocationNode = MethodInvocationNode.builder(holder.getContext())
-                .methodSelect(implicitGroupReferenceNode)
+        FieldAccessNode applyReferenceNode = FieldAccessNode.builder(holder.getContext())
+                .selected(instanceGroupInvocationNode)
+                .name("apply")
                 .build();
 
-        FieldAccessNode groupReferenceNode = FieldAccessNode.builder(holder.getContext())
-                .selected("RecordCodecBuilder")
-                .name("group")
+        MemberReferenceNode selfConstructorReferenceNode = MemberReferenceNode.builder(holder.getContext())
+                .mode(MemberReferenceTree.ReferenceMode.NEW)
+                .name("<init>")
+                .expression(classDeclNode.getName())
                 .build();
 
-        MethodInvocationNode groupInvocationNode = MethodInvocationNode.builder(holder.getContext())
+        MethodInvocationNode applyInvocationNode = MethodInvocationNode.builder(holder.getContext())
+                .methodSelect(applyReferenceNode)
+                .argument("instance")
+                .argument(selfConstructorReferenceNode)
                 .build();
 
-        VariableDeclNode instanceParamNode = VariableDeclNode.builder(holder.getContext())
-                .name("instance")
+        VariableDeclNode instanceReferenceNode = VariableDeclNode.builder(holder.getContext())
                 .implicitType()
+                .name("instance")
                 .build();
 
-        LambdaNode lambdaNode = LambdaNode.builder(holder.getContext())
-                .param(instanceParamNode)
-//                .body()
+        LambdaNode instanceGroupLambdaNode = LambdaNode.builder(holder.getContext())
+                .param(instanceReferenceNode)
+                .body(applyInvocationNode)
                 .build();
 
-        MethodInvocationNode invocationNode = MethodInvocationNode.builder(holder.getContext())
-                .methodSelect(createReferenceNode)
-//                .arguments()
+        FieldAccessNode recordCodecBuilderCreateReferenceNode = FieldAccessNode.builder(holder.getContext())
+                .selected("RecordCodecBuilder")
+                .name("create")
                 .build();
 
-        return VariableDeclNode.builder(holder.getContext())
+        MethodInvocationNode recordCodecBuilderCreateInvocationNode = MethodInvocationNode.builder(holder.getContext())
+                .methodSelect(recordCodecBuilderCreateReferenceNode)
+                .argument(instanceGroupLambdaNode)
+                .build();
+
+        VariableDeclNode codecNode = VariableDeclNode.builder(holder.getContext())
                 .modifiers(Flags.PUBLIC | Flags.STATIC)
                 .name(codecFieldName)
                 .type("Codec")
-                .genericParam(classDeclNode.getTree().name)
-                .initialValue(null)
+                .genericParam(classDeclNode.getName())
+                .initialValue(recordCodecBuilderCreateInvocationNode)
                 .build();
-    }
-
-    private ImportNode createCodecImport() {
-        return ImportNode.builder(holder.getContext())
-                .importPath(CODEC_IMPORT)
-                .isStatic(false)
-                .build();
+        holder.printMessage("Created codec field: " + codecNode);
+        return codecNode;
     }
 }

@@ -13,6 +13,7 @@ import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Names;
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -31,7 +32,7 @@ public class AutoCodecProcessor extends AbstractProcessor {
     private JavacTrees javacTrees;
 
     @Override
-    public synchronized void init(javax.annotation.processing.ProcessingEnvironment processingEnv) {
+    public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.javacTrees = JavacTrees.instance(processingEnv);
         Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
@@ -39,12 +40,12 @@ public class AutoCodecProcessor extends AbstractProcessor {
         Names names = Names.instance(context);
         Symtab symtab = Symtab.instance(context);
         Types types = Types.instance(context);
-        this.processingContext = new ProcessingContext(treeMaker, names, symtab, types);
+        this.processingContext = new ProcessingContext(treeMaker, names, symtab, types, processingEnv.getMessager());
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Processing annotations: " + annotations);
+        processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Processing annotations: " + annotations);
         for (TypeElement annotation : annotations) {
             Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
             for (Element element : elements) {
@@ -54,9 +55,9 @@ public class AutoCodecProcessor extends AbstractProcessor {
                 if (autoCodec == null) continue;
 
                 JCTree.JCCompilationUnit compilationUnit = (JCTree.JCCompilationUnit) javacTrees.getPath(element).getCompilationUnit();
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Input: " + compilationUnit);
+                processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Input: " + compilationUnit);
                 compilationUnit.accept(new CodecFieldAdder(processingContext, autoCodec.name()));
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Output: " + compilationUnit);
+                processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Output: " + compilationUnit);
             }
         }
         return true;

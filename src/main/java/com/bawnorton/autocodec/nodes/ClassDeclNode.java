@@ -8,7 +8,7 @@ import com.sun.tools.javac.util.List;
 public final class ClassDeclNode extends TreeNode {
     private final JCTree.JCClassDecl classDecl;
     private final Tree.Kind kind;
-    private final List<VariableDeclNode> fields;
+    private List<VariableDeclNode> fields;
 
     public ClassDeclNode(JCTree.JCClassDecl classDecl) {
         this.classDecl = classDecl;
@@ -33,8 +33,12 @@ public final class ClassDeclNode extends TreeNode {
         return fields;
     }
 
+    public String getName() {
+        return classDecl.getSimpleName().toString();
+    }
+
     public void addField(VariableDeclNode field) {
-        fields.add(field);
+        fields = fields.append(field);
         classDecl.defs = classDecl.defs.prepend(field.getTree());
     }
 

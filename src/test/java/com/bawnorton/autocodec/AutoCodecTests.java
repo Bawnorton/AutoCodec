@@ -67,6 +67,7 @@ public class AutoCodecTests {
                 .filter(fieldNode -> fieldNode.name.equals("CODEC"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
+        compilation.notes().forEach(System.err::println);
     }
 
     @Test
@@ -77,6 +78,7 @@ public class AutoCodecTests {
         ClassNode classNode = readClassNode(output);
 
         assert classNode.fields.stream().noneMatch(fieldNode -> fieldNode.name.equals("CODEC"));
+        compilation.notes().forEach(System.err::println);
     }
 
     @Test
@@ -90,5 +92,6 @@ public class AutoCodecTests {
                 .filter(fieldNode -> fieldNode.name.equals("CODEC"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
+        compilation.notes().forEach(System.err::println);
     }
 }

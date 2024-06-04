@@ -11,7 +11,7 @@ import javax.lang.model.element.Modifier;
 import java.lang.annotation.Annotation;
 
 // Field
-public final class VariableDeclNode {
+public final class VariableDeclNode extends TreeNode {
     private final JCTree.JCVariableDecl variableDecl;
     private final List<AnnotationNode> annotations;
 
@@ -25,7 +25,7 @@ public final class VariableDeclNode {
         this.annotations = annotations;
     }
 
-    public JCTree.JCVariableDecl getVariableDecl() {
+    public JCTree.JCVariableDecl getTree() {
         return variableDecl;
     }
 
@@ -51,11 +51,14 @@ public final class VariableDeclNode {
 
     public static class Builder extends ContextHolder {
         private JCTree.JCExpression primitiveType;
-        private JCTree.JCExpression initializer;
-        private Name name;
         private Name typeName;
+        private boolean implicit;
         private List<Name> genericParams;
+
         private long flags;
+        private Name name;
+
+        private JCTree.JCExpression initializer;
 
         private Builder(ProcessingContext context) {
             super(context);
@@ -70,21 +73,27 @@ public final class VariableDeclNode {
             return type(names().fromString(typeName));
         }
 
+        public Builder primitiveType(TypeTag typeTag) {
+            this.primitiveType = treeMaker().TypeIdent(typeTag);
+            return this;
+        }
+
+        public Builder implicitType() {
+            this.implicit = true;
+            return this;
+        }
+
         public Builder genericParam(Name name) {
-            if (genericParams == null) {
-                genericParams = List.nil();
+            if(genericParams == null) {
+                genericParams = List.of(name);
+            } else {
+                genericParams = genericParams.append(name);
             }
-            genericParams = genericParams.append(name);
             return this;
         }
 
         public Builder genericParam(String name) {
             return genericParam(names().fromString(name));
-        }
-
-        public Builder primitiveType(TypeTag typeTag) {
-            this.primitiveType = treeMaker().TypeIdent(typeTag);
-            return this;
         }
 
         public Builder name(Name name) {
@@ -107,17 +116,20 @@ public final class VariableDeclNode {
         }
 
         public VariableDeclNode build() {
-            if (typeName == null && primitiveType == null) throw new IllegalStateException("Type must be set");
             if (name == null) throw new IllegalStateException("Name must be set");
 
             JCTree.JCExpression type;
-            if(primitiveType != null) {
+            if(implicit) {
+                type = null;
+            } else if (primitiveType != null) {
                 type = primitiveType;
-            } else if(genericParams == null) {
+            } else if (genericParams == null && typeName != null) {
                 type = treeMaker().Ident(typeName);
-            } else {
+            } else if (typeName != null) {
                 List<JCTree.JCExpression> typeArgs = genericParams.stream().map(treeMaker()::Ident).collect(List::nil, List::append, List::appendList);
                 type = treeMaker().TypeApply(treeMaker().Ident(typeName), typeArgs);
+            } else {
+                throw new IllegalStateException("Type must be set");
             }
 
             JCTree.JCVariableDecl varDecl = treeMaker().VarDef(treeMaker().Modifiers(flags), name, type, initializer);

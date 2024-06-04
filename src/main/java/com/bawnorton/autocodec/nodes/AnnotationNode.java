@@ -3,14 +3,14 @@ package com.bawnorton.autocodec.nodes;
 import com.sun.tools.javac.tree.JCTree;
 import java.lang.annotation.Annotation;
 
-public final class AnnotationNode {
+public final class AnnotationNode extends ExpressionNode {
     private final JCTree.JCAnnotation annotation;
 
     public AnnotationNode(JCTree.JCAnnotation annotation) {
         this.annotation = annotation;
     }
 
-    public JCTree.JCAnnotation getAnnotation() {
+    public JCTree.JCAnnotation getTree() {
         return annotation;
     }
 

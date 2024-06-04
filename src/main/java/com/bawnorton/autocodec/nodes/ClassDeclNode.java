@@ -5,7 +5,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
 // Class, Enum, Interface, Record, Annotation
-public final class ClassDeclNode {
+public final class ClassDeclNode extends TreeNode {
     private final JCTree.JCClassDecl classDecl;
     private final Tree.Kind kind;
     private final List<VariableDeclNode> fields;
@@ -25,7 +25,7 @@ public final class ClassDeclNode {
         this.fields = fields;
     }
 
-    public JCTree.JCClassDecl getClassDecl() {
+    public JCTree.JCClassDecl getTree() {
         return classDecl;
     }
 
@@ -35,7 +35,7 @@ public final class ClassDeclNode {
 
     public void addField(VariableDeclNode field) {
         fields.add(field);
-        classDecl.defs = classDecl.defs.prepend(field.getVariableDecl());
+        classDecl.defs = classDecl.defs.prepend(field.getTree());
     }
 
     public void addImport() {}

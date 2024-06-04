@@ -5,37 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d1717dc-8cd1-4147-852e-c11cf2f78cbe" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/Ignore.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/Optional.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/AnnotationNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ImportNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/processor/AutoCodecProcessor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/NodeVisitor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ContextHolder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/ProcessingContext.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/bawnorton/autocodec/AutoCodecTests.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/resources/AlternateCodec.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/resources/EmptyRecord.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/bawnorton/autocodec/Main.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/bawnorton/autocodec/TestRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/TestRecord.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processor/build.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/processor/src/main/java/com/bawnorton/autocodec/AutoCodec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/AutoCodec.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processor/src/main/java/com/bawnorton/autocodec/AutoCodecProcessor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ExpressionNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/FieldAccessNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/LambdaNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/LiteralNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MemberReferenceNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/TreeNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/util/CodecLookup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/AnnotationNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/AnnotationNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/ClassDeclNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/CompilationUnitNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/MethodInvocationNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/nodes/VariableDeclNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,6 +97,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "Gradle.AutoCodec [build].executor": "Run",
     "Gradle.AutoCodec [clean].executor": "Run",
     "Gradle.AutoCodec [publishToMavenLocal].executor": "Run",
@@ -300,7 +284,7 @@
       <updated>1717428444631</updated>
       <workItem from="1717428445631" duration="8868000" />
       <workItem from="1717439107226" duration="1306000" />
-      <workItem from="1717440423390" duration="18452000" />
+      <workItem from="1717440423390" duration="22019000" />
     </task>
     <servers />
   </component>
@@ -312,8 +296,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/bawnorton/autocodec/tree/CodecFieldAdder.java</url>
-          <line>90</line>
-          <option name="timeStamp" value="38" />
+          <line>155</line>
+          <option name="timeStamp" value="39" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

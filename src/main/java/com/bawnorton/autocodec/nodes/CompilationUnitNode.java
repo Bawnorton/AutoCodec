@@ -5,7 +5,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
 // File
-public final class CompilationUnitNode {
+public final class CompilationUnitNode extends TreeNode {
     private final JCTree.JCCompilationUnit compilationUnit;
     private final List<ImportNode> imports;
 
@@ -23,7 +23,7 @@ public final class CompilationUnitNode {
         this.imports = imports;
     }
 
-    public JCTree.JCCompilationUnit getCompilationUnit() {
+    public JCTree.JCCompilationUnit getTree() {
         return compilationUnit;
     }
 

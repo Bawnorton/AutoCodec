@@ -30,15 +30,23 @@ public class AutoCodecTests {
     }
 
     private Compilation compile(String resourceName) {
-        JavaFileObject testResource = JavaFileObjects.forResource(Resources.getResource(resourceName));
-        return Compiler.javac()
+        JavaFileObject testResource = JavaFileObjects.forResource(Resources.getResource("%s.java".formatted(resourceName)));
+        Compilation compilation = Compiler.javac()
                 .withProcessors(new AutoCodecProcessor())
                 .compile(testResource);
+
+        compilation.notes().forEach(System.err::println);
+
+        if(compilation.status() == Compilation.Status.FAILURE) {
+            compilation.errors().forEach(System.err::println);
+        }
+
+        return compilation;
     }
 
     private JavaFileObject getGeneratedFile(Compilation compilation, String className) {
         return compilation
-                .generatedFile(StandardLocation.CLASS_OUTPUT, className + ".class")
+                .generatedFile(StandardLocation.CLASS_OUTPUT, "%s.class".formatted(className))
                 .orElseThrow(() -> new AssertionError("No output file found"));
     }
 
@@ -56,42 +64,44 @@ public class AutoCodecTests {
         }
     }
 
+    private ClassNode compileAndRead(String resourceName) {
+        Compilation compilation = compile(resourceName);
+        assertThat(compilation).succeeded();
+        JavaFileObject output = getGeneratedFile(compilation, resourceName);
+        return readClassNode(output);
+    }
+
+
     @Test
     public void testSimpleRecord() {
-        Compilation compilation = compile("TestRecord.java");
-        assertThat(compilation).succeeded();
-        JavaFileObject output = getGeneratedFile(compilation, "TestRecord");
-        ClassNode classNode = readClassNode(output);
-
+        ClassNode classNode = compileAndRead("SimpleRecord");
         FieldNode codecField = classNode.fields.stream()
                 .filter(fieldNode -> fieldNode.name.equals("CODEC"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
-        compilation.notes().forEach(System.err::println);
     }
 
     @Test
     public void testEmptyRecord() {
-        Compilation compilation = compile("EmptyRecord.java");
-        assertThat(compilation).succeeded();
-        JavaFileObject output = getGeneratedFile(compilation, "EmptyRecord");
-        ClassNode classNode = readClassNode(output);
-
+        ClassNode classNode = compileAndRead("EmptyRecord");
         assert classNode.fields.stream().noneMatch(fieldNode -> fieldNode.name.equals("CODEC"));
-        compilation.notes().forEach(System.err::println);
     }
 
     @Test
     public void testAlternateCodec() {
-        Compilation compilation = compile("AlternateCodec.java");
-        assertThat(compilation).succeeded();
-        JavaFileObject output = getGeneratedFile(compilation, "AlternateCodec");
-        ClassNode classNode = readClassNode(output);
-
+        ClassNode classNode = compileAndRead("AlternateCodec");
         FieldNode codecField = classNode.fields.stream()
                 .filter(fieldNode -> fieldNode.name.equals("CODEC"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
-        compilation.notes().forEach(System.err::println);
+    }
+
+    @Test
+    public void testLotOfStrings() {
+        ClassNode classNode = compileAndRead("LotOfStrings");
+        FieldNode codecField = classNode.fields.stream()
+                .filter(fieldNode -> fieldNode.name.equals("CODEC"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
     }
 }

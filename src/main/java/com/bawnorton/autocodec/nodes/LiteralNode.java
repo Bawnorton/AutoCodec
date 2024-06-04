@@ -1,6 +1,7 @@
 package com.bawnorton.autocodec.nodes;
 
 import com.bawnorton.autocodec.util.ProcessingContext;
+import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 
 public final class LiteralNode extends ExpressionNode {
@@ -12,6 +13,10 @@ public final class LiteralNode extends ExpressionNode {
 
     public JCTree.JCLiteral getTree() {
         return literal;
+    }
+
+    public static LiteralNode nullLiteral(ProcessingContext context) {
+        return new LiteralNode(context.treeMaker().Literal(TypeTag.BOT, null));
     }
 
     public static Builder builder(ProcessingContext context) {

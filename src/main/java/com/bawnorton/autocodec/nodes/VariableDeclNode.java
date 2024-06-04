@@ -2,6 +2,7 @@ package com.bawnorton.autocodec.nodes;
 
 import com.bawnorton.autocodec.util.ContextHolder;
 import com.bawnorton.autocodec.util.ProcessingContext;
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
@@ -49,14 +50,23 @@ public final class VariableDeclNode extends TreeNode {
         return new Builder(context);
     }
 
+    public List<AnnotationNode> getAnnotations() {
+        return annotations;
+    }
+
     public static class Builder extends ContextHolder {
         private JCTree.JCExpression primitiveType;
         private Name typeName;
+        private Name enclosingTypeName;
         private boolean implicit;
-        private List<Name> genericParams;
+        private List<JCTree.JCClassDecl> genericParams = List.nil();
 
         private long flags;
         private Name name;
+        private Name module;
+
+        private boolean noSym;
+        private Symbol.ClassSymbol ownerSym;
 
         private JCTree.JCExpression initializer;
 
@@ -73,6 +83,10 @@ public final class VariableDeclNode extends TreeNode {
             return type(names().fromString(typeName));
         }
 
+        public Builder type(Type type) {
+            return type(type.tsym.getQualifiedName());
+        }
+
         public Builder primitiveType(TypeTag typeTag) {
             this.primitiveType = treeMaker().TypeIdent(typeTag);
             return this;
@@ -83,17 +97,22 @@ public final class VariableDeclNode extends TreeNode {
             return this;
         }
 
-        public Builder genericParam(Name name) {
-            if(genericParams == null) {
-                genericParams = List.of(name);
-            } else {
-                genericParams = genericParams.append(name);
-            }
+        public Builder enclosingType(Name enclosingTypeName) {
+            this.enclosingTypeName = enclosingTypeName;
             return this;
         }
 
-        public Builder genericParam(String name) {
-            return genericParam(names().fromString(name));
+        public Builder enclosingType(String enclosingTypeName) {
+            return enclosingType(names().fromString(enclosingTypeName));
+        }
+
+        public Builder genericParam(JCTree.JCClassDecl genericParam) {
+            genericParams = genericParams.append(genericParam);
+            return this;
+        }
+
+        public Builder genericParam(ClassDeclNode genericParam) {
+            return genericParam(genericParam.getTree());
         }
 
         public Builder name(Name name) {
@@ -103,6 +122,29 @@ public final class VariableDeclNode extends TreeNode {
 
         public Builder name(String name) {
             return name(names().fromString(name));
+        }
+
+        public Builder module(Name module) {
+            this.module = module;
+            return this;
+        }
+
+        public Builder module(String module) {
+            return module(names().fromString(module));
+        }
+
+        public Builder noSym() {
+            this.noSym = true;
+            return this;
+        }
+
+        public Builder owner(JCTree.JCClassDecl owner) {
+            ownerSym = owner.sym;
+            return this;
+        }
+
+        public Builder owner(ClassDeclNode owner) {
+            return owner(owner.getTree());
         }
 
         public Builder modifiers(long flags) {
@@ -123,23 +165,68 @@ public final class VariableDeclNode extends TreeNode {
             if (name == null) throw new IllegalStateException("Name must be set");
 
             JCTree.JCExpression type;
+            Symbol.VarSymbol sym = null;
             if(implicit) {
                 type = null;
             } else if (primitiveType != null) {
                 type = primitiveType;
-            } else if (genericParams == null && typeName != null) {
+            } else if (genericParams.isEmpty() && typeName != null) {
                 type = treeMaker().Ident(typeName);
             } else if (typeName != null) {
-                List<JCTree.JCExpression> typeArgs = List.nil();
-                for (Name genericParam : genericParams) {
-                    typeArgs = typeArgs.append(treeMaker().Ident(genericParam));
+                List<JCTree.JCExpression> genericArgs = List.nil();
+                for (JCTree.JCClassDecl genericParam : genericParams) {
+                    genericArgs = genericArgs.append(treeMaker().Ident(genericParam.name));
                 }
-                type = treeMaker().TypeApply(treeMaker().Ident(typeName), typeArgs);
+                JCTree.JCIdent typeIdent = treeMaker().Ident(typeName);
+                if (enclosingTypeName != null) {
+                    JCTree.JCIdent enclosingTypeIdent = treeMaker().Ident(enclosingTypeName);
+                    type = treeMaker().TypeApply(
+                            FieldAccessNode.builder(context)
+                                    .selected(enclosingTypeIdent)
+                                    .name(typeName)
+                                    .build()
+                                    .getTree(),
+                            genericArgs
+                    );
+                } else {
+                    type = treeMaker().TypeApply(typeIdent, genericArgs);
+                }
+
+                if (!noSym) {
+                    if (module == null) {
+                        throw new IllegalStateException("Module must be set or noSym must be true");
+                    }
+                    if (ownerSym == null) {
+                        throw new IllegalStateException("Owner must be set or noSym must be true");
+                    }
+
+                    Symbol.ModuleSymbol moduleSymbol = symtab().enterModule(module);
+                    Symbol.ClassSymbol classSymbol = symtab().enterClass(moduleSymbol, module.append(names().fromString("."))
+                            .append(typeName));
+                    List<Type> typeArgs = List.nil();
+                    for (JCTree.JCClassDecl genericParam : genericParams) {
+                        typeArgs = typeArgs.append(genericParam.sym.type);
+                    }
+
+                    Type.ClassType classType = new Type.ClassType(
+                            Type.noType,
+                            typeArgs,
+                            classSymbol
+                    );
+                    type.type = classType;
+                    ((JCTree.JCIdent) ((JCTree.JCTypeApply) type).clazz).sym = classSymbol;
+                    ((JCTree.JCTypeApply) type).clazz.type = new Type.ClassType(Type.noType, List.nil(), classSymbol);
+
+                    sym = new Symbol.VarSymbol(flags, name, classType, ownerSym);
+                }
             } else {
                 throw new IllegalStateException("Type must be set");
             }
 
             JCTree.JCVariableDecl varDecl = treeMaker().VarDef(treeMaker().Modifiers(flags), name, type, initializer);
+            if (sym != null) {
+                varDecl.sym = sym;
+            }
             return new VariableDeclNode(varDecl);
         }
     }

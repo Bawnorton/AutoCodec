@@ -61,11 +61,9 @@ public final class MemberReferenceNode extends ExpressionNode {
         }
 
         public Builder typeArg(JCTree.JCExpression typeArg) {
-            if (typeArgs == null) {
-                typeArgs = List.of(typeArg);
-            } else {
-                typeArgs = typeArgs.append(typeArg);
-            }
+            if (typeArgs == null) typeArgs = List.nil();
+
+            typeArgs = typeArgs.append(typeArg);
             return this;
         }
 

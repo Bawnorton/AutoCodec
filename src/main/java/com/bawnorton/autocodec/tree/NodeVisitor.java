@@ -35,7 +35,7 @@ public abstract class NodeVisitor extends TreeTranslator {
     public final void visitImport(JCTree.JCImport tree) {
         ImportNode importNode = new ImportNode(tree);
         visitImportNode(importNode);
-        super.visitImport(importNode.getImport());
+        super.visitImport(importNode.getTree());
     }
 
     @Override

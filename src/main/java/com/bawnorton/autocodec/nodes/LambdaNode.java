@@ -21,7 +21,7 @@ public final class LambdaNode extends ExpressionNode {
     }
 
     public static class Builder extends ContextHolder {
-        private List<JCTree.JCVariableDecl> params;
+        private List<JCTree.JCVariableDecl> params = List.nil();
         private JCTree.JCMethodInvocation body;
 
         private Builder(ProcessingContext context) {
@@ -29,11 +29,7 @@ public final class LambdaNode extends ExpressionNode {
         }
 
         public Builder param(JCTree.JCVariableDecl param) {
-            if (params == null) {
-                params = List.of(param);
-            } else {
-                params = params.append(param);
-            }
+            params = params.append(param);
             return this;
         }
 

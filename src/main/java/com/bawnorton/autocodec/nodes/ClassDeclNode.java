@@ -9,6 +9,7 @@ public final class ClassDeclNode extends TreeNode {
     private final JCTree.JCClassDecl classDecl;
     private final Tree.Kind kind;
     private List<VariableDeclNode> fields;
+    private List<MethodDeclNode> methods;
 
     public ClassDeclNode(JCTree.JCClassDecl classDecl) {
         this.classDecl = classDecl;
@@ -17,12 +18,18 @@ public final class ClassDeclNode extends TreeNode {
         List<JCTree> definitions = classDecl.defs;
 
         List<VariableDeclNode> fields = List.nil();
+        List<MethodDeclNode> methods = List.nil();
+
         for (JCTree definition : definitions) {
             if(definition.getKind() == Tree.Kind.VARIABLE) {
                 fields = fields.append(new VariableDeclNode((JCTree.JCVariableDecl) definition));
+            } else if (definition.getKind() == Tree.Kind.METHOD) {
+                methods = methods.append(new MethodDeclNode((JCTree.JCMethodDecl) definition));
             }
         }
+
         this.fields = fields;
+        this.methods = methods;
     }
 
     public JCTree.JCClassDecl getTree() {
@@ -33,6 +40,20 @@ public final class ClassDeclNode extends TreeNode {
         return fields;
     }
 
+    public List<MethodDeclNode> getMethods() {
+        return methods;
+    }
+
+    public List<MethodDeclNode> getConstructors() {
+        List<MethodDeclNode> constructors = List.nil();
+        for (MethodDeclNode method : methods) {
+            if (method.isConstructor()) {
+                constructors = constructors.append(method);
+            }
+        }
+        return constructors;
+    }
+
     public String getName() {
         return classDecl.getSimpleName().toString();
     }
@@ -40,6 +61,11 @@ public final class ClassDeclNode extends TreeNode {
     public void addField(VariableDeclNode field) {
         fields = fields.append(field);
         classDecl.defs = classDecl.defs.prepend(field.getTree());
+    }
+
+    public void addMethod(MethodDeclNode method) {
+        methods = methods.append(method);
+        classDecl.defs = classDecl.defs.append(method.getTree());
     }
 
     public void addImport() {}

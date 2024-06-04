@@ -6,14 +6,14 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 
 // Import
-public final class ImportNode {
+public final class ImportNode extends TreeNode {
     private final JCTree.JCImport importNode;
 
     public ImportNode(JCTree.JCImport importNode) {
         this.importNode = importNode;
     }
 
-    public JCTree.JCImport getImport() {
+    public JCTree.JCImport getTree() {
         return importNode;
     }
 

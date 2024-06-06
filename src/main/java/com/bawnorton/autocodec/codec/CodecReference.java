@@ -1,11 +1,8 @@
 package com.bawnorton.autocodec.codec;
 
-import com.bawnorton.autocodec.nodes.MethodInvocationNode;
-import com.bawnorton.autocodec.nodes.VariableDeclNode;
-import com.sun.tools.javac.code.Type;
+import com.bawnorton.autocodec.node.ExpressionNode;
+import com.bawnorton.autocodec.node.VariableDeclNode;
+import com.bawnorton.autocodec.util.ProcessingContext;
 
-public record CodecReference(VariableDeclNode fieldNode, MethodInvocationNode codecNode) {
-    public Type.ClassType getType() {
-        return (Type.ClassType) fieldNode.getType();
-    }
+public record CodecReference(ProcessingContext context, VariableDeclNode fieldNode, ExpressionNode codecNode) {
 }

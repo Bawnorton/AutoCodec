@@ -1,13 +1,15 @@
 package com.bawnorton.autocodec.tree;
 
-import com.bawnorton.autocodec.nodes.ClassDeclNode;
-import com.bawnorton.autocodec.nodes.CompilationUnitNode;
-import com.bawnorton.autocodec.nodes.ImportNode;
+import com.bawnorton.autocodec.node.ClassDeclNode;
+import com.bawnorton.autocodec.node.CompilationUnitNode;
 import com.bawnorton.autocodec.util.ContextHolder;
 import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeTranslator;
 
+/**
+ * Tree visitor that wraps `JCTree` elements in `Node` objects.
+ */
 public abstract class NodeVisitor extends TreeTranslator {
     protected final ContextHolder holder;
 

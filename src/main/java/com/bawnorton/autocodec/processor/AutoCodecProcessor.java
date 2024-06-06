@@ -1,7 +1,7 @@
 package com.bawnorton.autocodec.processor;
 
 import com.bawnorton.autocodec.AutoCodec;
-import com.bawnorton.autocodec.tree.CodecFieldAdder;
+import com.bawnorton.autocodec.tree.CodecAdder;
 import com.bawnorton.autocodec.util.ProcessingContext;
 import com.google.auto.service.AutoService;
 import com.sun.tools.javac.api.JavacTrees;
@@ -56,7 +56,7 @@ public class AutoCodecProcessor extends AbstractProcessor {
 
                 JCTree.JCCompilationUnit compilationUnit = (JCTree.JCCompilationUnit) javacTrees.getPath(element).getCompilationUnit();
                 processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Input: " + compilationUnit);
-                compilationUnit.accept(new CodecFieldAdder(processingContext, autoCodec.name()));
+                compilationUnit.accept(new CodecAdder(processingContext, autoCodec.name()));
                 processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Output: " + compilationUnit);
             }
         }

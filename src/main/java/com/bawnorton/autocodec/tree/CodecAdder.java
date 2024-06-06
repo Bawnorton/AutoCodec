@@ -6,8 +6,9 @@ import com.bawnorton.autocodec.Optional;
 import com.bawnorton.autocodec.codec.CodecLookup;
 import com.bawnorton.autocodec.codec.CodecReference;
 import com.bawnorton.autocodec.node.creator.ClassConstructorCreator;
-import com.bawnorton.autocodec.node.creator.RecordConstructorCreator;
 import com.bawnorton.autocodec.node.*;
+import com.bawnorton.autocodec.node.creator.ConstructorCreator;
+import com.bawnorton.autocodec.node.creator.RecordConstructorCreator;
 import com.bawnorton.autocodec.util.IncludedField;
 import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.source.tree.MemberReferenceTree;
@@ -22,7 +23,6 @@ public class CodecAdder extends NodeVisitor {
 
     static {
         NEEDED_IMPORTS.add("com.mojang.serialization.Codec");
-        NEEDED_IMPORTS.add("com.mojang.datafixers.kinds.App");
         NEEDED_IMPORTS.add("com.mojang.serialization.codecs.RecordCodecBuilder");
     }
 
@@ -39,7 +39,10 @@ public class CodecAdder extends NodeVisitor {
 
         LambdaNode codecCreatorNode = createCodecLambda(classDeclNode);
         classDeclNode.addField(createCodecField(classDeclNode, codecCreatorNode));
+        if(classDeclNode.isRecord()) return;
 
+        // Update positions of class members to ensure the flow calculation does not ignore new parameters
+        // Records already have their positions updated by the compiler
         PositionUpdater positionUpdater = new PositionUpdater(holder.getContext());
         positionUpdater.updatePositions(classDeclNode.getTree(), classDeclNode.getTree().getStartPosition());
     }
@@ -76,6 +79,7 @@ public class CodecAdder extends NodeVisitor {
             boolean isStatic = field.isStatic();
             return !(ignore || isStatic);
         }).count() > MAX_FIELDS) {
+            holder.printError("Too many fields for codec generation. Max: " + MAX_FIELDS + ", Found: " + fields.size());
             return true;
         }
 
@@ -170,7 +174,9 @@ public class CodecAdder extends NodeVisitor {
     }
 
     private CodecReference createCodecReference(ClassDeclNode classDeclNode, IncludedField includedField) {
-        createGetterIfMissing(classDeclNode, includedField);
+        if(!classDeclNode.isRecord()) {
+            createGetterIfMissing(classDeclNode, includedField);
+        }
 
         VariableDeclNode field = includedField.variableDeclNode();
         boolean isRequired = !includedField.optional();
@@ -217,19 +223,12 @@ public class CodecAdder extends NodeVisitor {
 
         MethodDeclNode constructor = classDeclNode.findConstructor(parameterTypes);
         if(constructor == null) {
-            if(classDeclNode.isRecord()) {
-                RecordConstructorCreator wrapper = new RecordConstructorCreator(classDeclNode);
-                wrapper.createCtorForFields(holder.getContext(), includedFields);
-            } else if (classDeclNode.isClass()) {
-                ClassConstructorCreator wrapper = new ClassConstructorCreator(classDeclNode);
-                wrapper.createCtorForFields(holder.getContext(), includedFields);
-            }
+            ConstructorCreator ctorCreator = classDeclNode.getConstructorCreator();
+            ctorCreator.createCtorForFields(holder.getContext(), includedFields);
         }
     }
 
     private void createGetterIfMissing(ClassDeclNode classDeclNode, IncludedField includedField) {
-        if(classDeclNode.isRecord()) return;
-
         VariableDeclNode fieldNode = includedField.variableDeclNode();
         MethodDeclNode fieldGetter = classDeclNode.findMethod(fieldNode.getName(), fieldNode.getType());
         if(fieldGetter == null) {

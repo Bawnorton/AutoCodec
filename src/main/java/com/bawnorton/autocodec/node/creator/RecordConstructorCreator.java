@@ -9,20 +9,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public final class RecordConstructorCreator {
-    private final ClassDeclNode classDeclNode;
+public final class RecordConstructorCreator extends ConstructorCreator {
     private final MethodDeclNode mainCtor;
     private final Map<VariableDeclNode, List<AnnotationNode>> paramAnnotations;
 
     public RecordConstructorCreator(ClassDeclNode classDeclNode) {
-        if (!classDeclNode.isRecord()) {
-            throw new IllegalArgumentException("%s is not a `record`.".formatted(classDeclNode.getName()));
-        }
-
-        this.classDeclNode = classDeclNode;
+        super(classDeclNode);
         this.paramAnnotations = new HashMap<>();
         this.mainCtor = findMainRecordCtor();
+    }
+
+    @Override
+    protected Supplier<Boolean> validate() {
+        return classDeclNode::isRecord;
     }
 
     private MethodDeclNode findMainRecordCtor() {
@@ -46,6 +48,7 @@ public final class RecordConstructorCreator {
         throw new AssertionError("Record missing main constructor.");
     }
 
+    @Override
     public void createCtorForFields(ProcessingContext context, List<IncludedField> includedFields) {
         List<VariableDeclNode> parameters = new ArrayList<>();
         for (IncludedField includedField : includedFields) {

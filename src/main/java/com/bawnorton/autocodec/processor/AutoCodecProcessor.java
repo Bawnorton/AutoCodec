@@ -45,7 +45,6 @@ public class AutoCodecProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Processing annotations: " + annotations);
         for (TypeElement annotation : annotations) {
             Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
             for (Element element : elements) {
@@ -55,9 +54,8 @@ public class AutoCodecProcessor extends AbstractProcessor {
                 if (autoCodec == null) continue;
 
                 JCTree.JCCompilationUnit compilationUnit = (JCTree.JCCompilationUnit) javacTrees.getPath(element).getCompilationUnit();
-                processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Input: " + compilationUnit);
                 compilationUnit.accept(new CodecAdder(processingContext, autoCodec.name()));
-                processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Output: " + compilationUnit);
+                processingContext.messager().printMessage(Diagnostic.Kind.NOTE, "Processed: " + compilationUnit);
             }
         }
         return true;

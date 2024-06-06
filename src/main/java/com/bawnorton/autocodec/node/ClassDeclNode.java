@@ -1,5 +1,8 @@
 package com.bawnorton.autocodec.node;
 
+import com.bawnorton.autocodec.node.creator.ClassConstructorCreator;
+import com.bawnorton.autocodec.node.creator.ConstructorCreator;
+import com.bawnorton.autocodec.node.creator.RecordConstructorCreator;
 import com.bawnorton.autocodec.node.finder.MethodFinder;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Type;
@@ -69,12 +72,25 @@ public final class ClassDeclNode extends StatementNode implements MethodFinder {
         return classDecl.getSimpleName().toString();
     }
 
+    public Type.ClassType getType() {
+        return (Type.ClassType) classDecl.sym.type;
+    }
+
     public Type.ClassType getSuperClassType() {
         Type superClassType = classDecl.sym.getSuperclass();
         if (superClassType != Type.noType) {
             return (Type.ClassType) superClassType;
         }
         return null;
+    }
+
+    public ConstructorCreator getConstructorCreator() {
+        if (isRecord()) {
+            return new RecordConstructorCreator(this);
+        } else if (isClass()) {
+            return new ClassConstructorCreator(this);
+        }
+        throw new IllegalStateException("Cannot create constructor for non-record or non-class");
     }
 
     public boolean annotationPresent(Class<? extends Annotation> annotation) {

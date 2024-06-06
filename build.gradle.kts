@@ -5,7 +5,7 @@ plugins {
 
 
 group = "com.bawnorton.autocodec"
-version = "1.0.0"
+version = "0.1.0"
 
 var exports = listOf(
     "jdk.compiler/com.sun.tools.javac.code",
@@ -48,6 +48,7 @@ java {
 
     withSourcesJar()
 }
+
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {

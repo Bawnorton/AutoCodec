@@ -9,18 +9,19 @@ import com.sun.tools.javac.code.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public final class ClassConstructorCreator {
-    private final ClassDeclNode classDeclNode;
+public final class ClassConstructorCreator extends ConstructorCreator {
     private final List<Symbol.MethodSymbol> parentCtors;
 
     public ClassConstructorCreator(ClassDeclNode classDeclNode) {
-        if(!classDeclNode.isClass()) {
-            throw new IllegalArgumentException("%s is not a `class`.".formatted(classDeclNode.getName()));
-        }
-
-        this.classDeclNode = classDeclNode;
+        super(classDeclNode);
         this.parentCtors = initParentCtors();
+    }
+
+    @Override
+    protected Supplier<Boolean> validate() {
+        return classDeclNode::isClass;
     }
 
     private List<Symbol.MethodSymbol> initParentCtors() {
@@ -39,6 +40,7 @@ public final class ClassConstructorCreator {
         return parentCtors;
     }
 
+    @Override
     public void createCtorForFields(ProcessingContext context, List<IncludedField> includedFields) {
         MethodInvocationNode superCall = findIdenticalParentCtor(context, includedFields);
         if (superCall != null) {

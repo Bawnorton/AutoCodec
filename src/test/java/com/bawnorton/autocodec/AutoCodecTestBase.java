@@ -22,10 +22,8 @@ public abstract class AutoCodecTestBase {
                 .compile(testResource);
 
         compilation.notes().forEach(System.err::println);
-
-        if(compilation.status() == Compilation.Status.FAILURE) {
-            compilation.errors().forEach(System.err::println);
-        }
+        compilation.warnings().forEach(System.err::println);
+        compilation.errors().forEach(System.err::println);
 
         return compilation;
     }
@@ -55,5 +53,13 @@ public abstract class AutoCodecTestBase {
         assertThat(compilation).succeeded();
         JavaFileObject output = getGeneratedFile(compilation, outputName);
         return readClassNode(output);
+    }
+
+    protected void basicTest(String resourceName, String outputName) {
+        ClassNode classNode = compileAndRead(resourceName, outputName);
+        classNode.fields.stream()
+                .filter(fieldNode -> fieldNode.name.equals("CODEC"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
     }
 }

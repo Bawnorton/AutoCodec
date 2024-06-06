@@ -33,7 +33,15 @@ public class ContextHolder {
         return context.types();
     }
 
-    public void printMessage(String message) {
+    public void printNote(String message) {
         context.messager().printMessage(Diagnostic.Kind.NOTE, message);
+    }
+
+    public void printWarning(String message) {
+        context.messager().printMessage(Diagnostic.Kind.WARNING, message);
+    }
+
+    public void printError(String message) {
+        context.messager().printMessage(Diagnostic.Kind.ERROR, message);
     }
 }

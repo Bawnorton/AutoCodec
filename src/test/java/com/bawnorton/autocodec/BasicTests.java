@@ -1,17 +1,11 @@
 package com.bawnorton.autocodec;
 
+import com.google.testing.compile.Compilation;
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.tree.ClassNode;
+
+import static com.google.testing.compile.CompilationSubject.assertThat;
 
 public class BasicTests extends AutoCodecTestBase {
-    protected void basicTest(String resourceName, String outputName) {
-        ClassNode classNode = compileAndRead(resourceName, outputName);
-        classNode.fields.stream()
-                .filter(fieldNode -> fieldNode.name.equals("CODEC"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
-    }
-
     private void basicClassTest(String resourceName) {
         basicTest("class/basic/%s".formatted(resourceName), resourceName);
     }
@@ -21,26 +15,65 @@ public class BasicTests extends AutoCodecTestBase {
     }
 
     @Test
-    public void testBasicClasses() {
+    public void testAllTypes() {
         basicClassTest("AllTypes");
-        basicClassTest("AlternateCodec");
+    }
 
+    @Test
+    public void testAlternateCodec() {
+        basicClassTest("AlternateCodec");
+    }
+
+    @Test
+    public void testEmpty() {
         assert compileAndRead("class/basic/Empty", "Empty")
                 .fields.stream().noneMatch(fieldNode -> fieldNode.name.equals("CODEC"));
+    }
 
+    @Test
+    public void testExistingCtorDifOrder() {
+        basicClassTest("ExistingCtorDifOrder");
+    }
+
+    @Test
+    public void testLotOfStrings() {
         basicClassTest("LotOfStrings");
+    }
+
+    @Test
+    public void testSimple() {
         basicClassTest("Simple");
     }
 
     @Test
-    public void testBasicRecords() {
+    public void testTooManyFields() {
+        Compilation compilation = compile("class/basic/TooManyFields");
+        assertThat(compilation).failed();
+    }
+
+    @Test
+    public void testAllTypesRecord() {
         basicRecordTest("AllTypes");
+    }
+
+    @Test
+    public void testAlternateCodecRecord() {
         basicRecordTest("AlternateCodec");
+    }
 
-        assert compileAndRead("class/basic/Empty", "Empty")
+    @Test
+    public void testEmptyRecord() {
+        assert compileAndRead("record/basic/Empty", "Empty")
                 .fields.stream().noneMatch(fieldNode -> fieldNode.name.equals("CODEC"));
+    }
 
+    @Test
+    public void testLotOfStringsRecord() {
         basicRecordTest("LotOfStrings");
+    }
+
+    @Test
+    public void testSimpleRecord() {
         basicRecordTest("Simple");
     }
 }

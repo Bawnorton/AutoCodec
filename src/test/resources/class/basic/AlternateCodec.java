@@ -4,10 +4,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 @AutoCodec
 public class AlternateCodec {
-    public static final Codec<AlternateCodecClass> EXISTING_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.<Integer>fieldOf("integer").<AlternateCodecClass>forGetter(alternateCodec -> alternateCodec.integer),
-            Codec.STRING.<String>fieldOf("string").<AlternateCodecClass>forGetter(alternateCodec -> alternateCodec.string)
-    ).<AlternateCodecClass>apply(instance, AlternateCodecClass::new));
+    public static final Codec<AlternateCodec> EXISTING_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.INT.fieldOf("integer").forGetter(alternateCodec -> alternateCodec.integer),
+            Codec.STRING.fieldOf("string").forGetter(alternateCodec -> alternateCodec.string)
+    ).apply(instance, AlternateCodec::new));
 
     private final Integer integer;
     private final String string;

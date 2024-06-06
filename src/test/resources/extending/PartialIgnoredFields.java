@@ -8,14 +8,6 @@ public class PartialIgnoredFields extends Parent {
     private Integer i1;
     @Ignore
     private Integer i2;
-
-    public PartialIgnoredFields(Integer i1, String s1, String s2, Integer i2) {
-        super(i1, s1);
-        this.s1 = s1;
-        this.s2 = s2;
-        this.i1 = i1;
-        this.i2 = i2;
-    }
 }
 
 class Parent {

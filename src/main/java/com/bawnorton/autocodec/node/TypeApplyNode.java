@@ -6,7 +6,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
 
-public class TypeApplyNode extends ExpressionNode {
+public final class TypeApplyNode extends ExpressionNode {
     private final JCTree.JCTypeApply typeApply;
 
     public TypeApplyNode(JCTree.JCTypeApply typeApply) {

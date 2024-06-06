@@ -7,12 +7,14 @@ import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class ClassConstructorCreator extends ConstructorCreator {
     private final List<Symbol.MethodSymbol> parentCtors;
+    private boolean preferChild = true; // TODO: Gauge usefulness and remove if unnecessary
 
     public ClassConstructorCreator(ClassDeclNode classDeclNode) {
         super(classDeclNode);
@@ -42,20 +44,32 @@ public final class ClassConstructorCreator extends ConstructorCreator {
 
     @Override
     public void createCtorForFields(ProcessingContext context, List<IncludedField> includedFields) {
-        MethodInvocationNode superCall = findIdenticalParentCtor(context, includedFields);
-        if (superCall != null) {
-            createParentCallingCtor(context, superCall, includedFields);
-            return;
-        }
+        if(preferChild) {
+            MethodInvocationNode superCall = findMinArgParentConstructor(context);
+            if (superCall != null) {
+                // super() then assign fields
+                createParentCallingWithFieldAssigningCtor(context, superCall, includedFields);
+                return;
+            }
+        } else {
+            MethodInvocationNode superCall = findIdenticalParentCtor(context, includedFields);
+            if (superCall != null) {
+                // super(all fields)
+                createParentCallingCtor(context, superCall, includedFields);
+                return;
+            }
 
-        // find a parent Ctor that references some of the fields as parameters and keep track of the matched fields.
-        List<IncludedField> unmatchedFields = new ArrayList<>(includedFields);
-        superCall = findPartialParentCtor(context, includedFields, unmatchedFields::remove);
-        if (superCall != null) {
-            createPartialParentCallingCtor(context, superCall, includedFields, unmatchedFields);
-            return;
-        }
+            // find a parent Ctor that references some of the fields as parameters and keep track of the matched fields.
+            List<IncludedField> unmatchedFields = new ArrayList<>(includedFields);
+            superCall = findPartialParentCtor(context, includedFields, unmatchedFields::remove);
+            if (superCall != null) {
+                // super(matched fields) then assign unmatched fields
+                createPartialParentCallingCtor(context, superCall, includedFields, unmatchedFields);
+                return;
+            }
 
+        }
+        // assign fields
         createFieldAssigningCtor(context, includedFields);
     }
 
@@ -98,6 +112,22 @@ public final class ClassConstructorCreator extends ConstructorCreator {
         // private ClassName(args) { super(args); }
         classDeclNode.addMethod(MethodDeclNode.builder(context)
                 .modifiers(Flags.PRIVATE)
+                .name(context.names().init)
+                .params(fieldsToParameters(context, includedFields))
+                .body(body)
+                .build());
+    }
+
+    private void createParentCallingWithFieldAssigningCtor(ProcessingContext context, MethodInvocationNode superCall, List<IncludedField> includedFields) {
+        // super()
+        BlockNode.Builder bodyBuilder = BlockNode.builder(context)
+                .statement(superCall.toStatement(context.treeMaker()));
+        addFieldsToCtorBody(context, includedFields, bodyBuilder);
+        BlockNode body = bodyBuilder.build();
+
+        // public ClassName(fields) { super(); this.field = field; ... }
+        classDeclNode.addMethod(MethodDeclNode.builder(context)
+                .modifiers(Flags.PUBLIC)
                 .name(context.names().init)
                 .params(fieldsToParameters(context, includedFields))
                 .body(body)
@@ -240,6 +270,54 @@ public final class ClassConstructorCreator extends ConstructorCreator {
         return null;
     }
 
+    /**
+     * Find the parent constructor with the least number of arguments.
+     * <br>eg:
+     * <pre>
+     *     {@code
+     *     public class Child extends Parent {
+     *          private String s1;
+     *          private String s2;
+     *     }
+     *
+     *     public class Parent {
+     *          private Integer i1;
+     *          private String s1;
+     *
+     *          public Parent(Integer i1, String s1) {
+     *              this.i1 = i1;
+     *              this.s1 = s1;
+     *          }
+     *
+     *          public Parent(Integer i1) {
+     *              this.i1 = i1;
+     *          }
+     *
+     *          public Parent() {}
+     *      }
+     *      }
+     * </pre>
+     * creates the invocation {@code super()} for the {@code Child} constructor.
+     * If the no-arg constructor is not found, the constructor with the least number of arguments is used.
+     * @return the invocation node for the parent constructor or {@code null} if no matching constructor is found.
+     */
+    private MethodInvocationNode findMinArgParentConstructor(ProcessingContext context) {
+        Symbol.MethodSymbol minArgCtor = parentCtors.stream()
+                .min(Comparator.comparingInt(methodSymbol -> methodSymbol.getParameters().size()))
+                .orElse(null);
+        if (minArgCtor == null) return null;
+
+        List<ExpressionNode> arguments = new ArrayList<>();
+        for (Symbol.VarSymbol parameter : minArgCtor.getParameters()) {
+            arguments.add(LiteralNode.defaultLiteral(context, parameter.type));
+        }
+
+        // super(args)
+        return MethodInvocationNode.builder(context)
+                .methodSelect("super")
+                .arguments(arguments)
+                .build();
+    }
 
     private List<VariableDeclNode> fieldsToParameters(ProcessingContext context, List<IncludedField> matchedFields) {
         List<VariableDeclNode> parameters = new ArrayList<>();

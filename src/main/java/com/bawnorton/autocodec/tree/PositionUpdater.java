@@ -2,6 +2,7 @@ package com.bawnorton.autocodec.tree;
 
 import com.bawnorton.autocodec.util.ContextHolder;
 import com.bawnorton.autocodec.util.ProcessingContext;
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.parser.JavacParser;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
@@ -38,7 +39,7 @@ public final class PositionUpdater extends TreeScanner {
             actual.accept(this);
         }
 
-        private <T extends JCTree> void iterateAndAccept(List<T> actual, List<T> expected) {
+        private <T extends JCTree> void accept(List<T> actual, List<T> expected) {
             if(actual == null || expected == null) return;
             
             for(int i = 0; i < actual.size(); i++) {
@@ -51,7 +52,7 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCCompilationUnit tree = (JCTree.JCCompilationUnit) expected;
             that.pos = tree.pos;
 
-            iterateAndAccept(that.defs, tree.defs);
+            accept(that.defs, tree.defs);
         }
 
         @Override
@@ -59,7 +60,7 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCPackageDecl tree = (JCTree.JCPackageDecl) expected;
             that.pos = tree.pos;
 
-            iterateAndAccept(that.annotations, tree.annotations);
+            accept(that.annotations, tree.annotations);
             accept(that.pid, tree.pid);
         }
 
@@ -70,7 +71,7 @@ public final class PositionUpdater extends TreeScanner {
 
             accept(that.mods, tree.mods);
             accept(that.qualId, tree.qualId);
-            iterateAndAccept(that.directives, tree.directives);
+            accept(that.directives, tree.directives);
         }
 
         @Override
@@ -79,7 +80,7 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
 
             accept(that.qualid, tree.qualid);
-            iterateAndAccept(that.moduleNames, tree.moduleNames);
+            accept(that.moduleNames, tree.moduleNames);
         }
 
         @Override
@@ -88,7 +89,7 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
 
             accept(that.qualid, tree.qualid);
-            iterateAndAccept(that.moduleNames, tree.moduleNames);
+            accept(that.moduleNames, tree.moduleNames);
         }
 
         @Override
@@ -97,7 +98,7 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
 
             accept(that.serviceName, tree.serviceName);
-            iterateAndAccept(that.implNames, tree.implNames);
+            accept(that.implNames, tree.implNames);
         }
 
         @Override
@@ -126,15 +127,17 @@ public final class PositionUpdater extends TreeScanner {
 
         @Override
         public void visitClassDef(JCTree.JCClassDecl that) {
+            if(that.getKind() == Tree.Kind.RECORD) return; // Record positions are handled by the parser
+
             JCTree.JCClassDecl tree = (JCTree.JCClassDecl) expected;
             that.pos = tree.pos;
 
             accept(that.mods, tree.mods);
-            iterateAndAccept(that.typarams, tree.typarams);
+            accept(that.typarams, tree.typarams);
             accept(that.extending, tree.extending);
-            iterateAndAccept(that.implementing, tree.implementing);
-            iterateAndAccept(that.permitting, tree.permitting);
-            iterateAndAccept(that.defs, tree.defs);
+            accept(that.implementing, tree.implementing);
+            accept(that.permitting, tree.permitting);
+            accept(that.defs, tree.defs);
         }
 
         @Override
@@ -144,10 +147,10 @@ public final class PositionUpdater extends TreeScanner {
 
             accept(that.mods, tree.mods);
             accept(that.restype, tree.restype);
-            iterateAndAccept(that.typarams, tree.typarams);
+            accept(that.typarams, tree.typarams);
             accept(that.recvparam, tree.recvparam);
-            iterateAndAccept(that.params, tree.params);
-            iterateAndAccept(that.thrown, tree.thrown);
+            accept(that.params, tree.params);
+            accept(that.thrown, tree.thrown);
             accept(that.defaultValue, tree.defaultValue);
             accept(that.body, tree.body);
         }
@@ -172,7 +175,7 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCBlock tree = (JCTree.JCBlock) expected;
             that.pos = tree.pos;
 
-            iterateAndAccept(that.stats, tree.stats);
+            accept(that.stats, tree.stats);
         }
 
         @Override
@@ -198,9 +201,9 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCForLoop tree = (JCTree.JCForLoop) expected;
             that.pos = tree.pos;
 
-            iterateAndAccept(that.init, tree.init);
+            accept(that.init, tree.init);
             accept(that.cond, tree.cond);
-            iterateAndAccept(that.step, tree.step);
+            accept(that.step, tree.step);
             accept(that.body, tree.body);
         }
 
@@ -228,7 +231,7 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
 
             accept(that.selector, tree.selector);
-            iterateAndAccept(that.cases, tree.cases);
+            accept(that.cases, tree.cases);
         }
 
         @Override
@@ -236,8 +239,8 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCCase tree = (JCTree.JCCase) expected;
             that.pos = tree.pos;
 
-            iterateAndAccept(that.labels, tree.labels);
-            iterateAndAccept(that.stats, tree.stats);
+            accept(that.labels, tree.labels);
+            accept(that.stats, tree.stats);
         }
 
         @Override
@@ -246,7 +249,7 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
 
             accept(that.selector, tree.selector);
-            iterateAndAccept(that.cases, tree.cases);
+            accept(that.cases, tree.cases);
         }
 
         @Override
@@ -263,9 +266,9 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCTry tree = (JCTree.JCTry) expected;
             that.pos = tree.pos;
 
-            iterateAndAccept(that.resources, tree.resources);
+            accept(that.resources, tree.resources);
             accept(that.body, tree.body);
-            iterateAndAccept(that.catchers, tree.catchers);
+            accept(that.catchers, tree.catchers);
             accept(that.finalizer, tree.finalizer);
         }
 
@@ -345,9 +348,9 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCMethodInvocation tree = (JCTree.JCMethodInvocation) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.typeargs, tree.typeargs);
+            accept(that.typeargs, tree.typeargs);
             accept(that.meth, tree.meth);
-            iterateAndAccept(that.args, tree.args);
+            accept(that.args, tree.args);
         }
 
         public void visitNewClass(JCTree.JCNewClass that) {
@@ -355,9 +358,9 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
             
             accept(that.encl, tree.encl);
-            iterateAndAccept(that.typeargs, tree.typeargs);
+            accept(that.typeargs, tree.typeargs);
             accept(that.clazz, tree.clazz);
-            iterateAndAccept(that.args, tree.args);
+            accept(that.args, tree.args);
             accept(that.def, tree.def);
         }
 
@@ -365,15 +368,15 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCNewArray tree = (JCTree.JCNewArray) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.annotations, tree.annotations);
+            accept(that.annotations, tree.annotations);
             accept(that.elemtype, tree.elemtype);
-            iterateAndAccept(that.dims, tree.dims);
+            accept(that.dims, tree.dims);
             if(that.dimAnnotations != null && tree.dimAnnotations != null) {
                 for(int i = 0; i < that.dimAnnotations.size(); i++) {
-                    iterateAndAccept(that.dimAnnotations.get(i), tree.dimAnnotations.get(i));
+                    accept(that.dimAnnotations.get(i), tree.dimAnnotations.get(i));
                 }
             }
-            iterateAndAccept(that.elems, tree.elems);
+            accept(that.elems, tree.elems);
         }
 
         public void visitLambda(JCTree.JCLambda that) {
@@ -381,7 +384,7 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
             
             accept(that.body, tree.body);
-            iterateAndAccept(that.params, tree.params);
+            accept(that.params, tree.params);
         }
 
         public void visitParens(JCTree.JCParens that) {
@@ -486,7 +489,7 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
             
             accept(that.expr, tree.expr);
-            iterateAndAccept(that.typeargs, tree.typeargs);
+            accept(that.typeargs, tree.typeargs);
         }
 
         public void visitIdent(JCTree.JCIdent that) {
@@ -510,29 +513,29 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
             
             accept(that.clazz, tree.clazz);
-            iterateAndAccept(that.arguments, tree.arguments);
+            accept(that.arguments, tree.arguments);
         }
 
         public void visitTypeUnion(JCTree.JCTypeUnion that) {
             JCTree.JCTypeUnion tree = (JCTree.JCTypeUnion) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.alternatives, tree.alternatives);
+            accept(that.alternatives, tree.alternatives);
         }
 
         public void visitTypeIntersection(JCTree.JCTypeIntersection that) {
             JCTree.JCTypeIntersection tree = (JCTree.JCTypeIntersection) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.bounds, tree.bounds);
+            accept(that.bounds, tree.bounds);
         }
 
         public void visitTypeParameter(JCTree.JCTypeParameter that) {
             JCTree.JCTypeParameter tree = (JCTree.JCTypeParameter) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.annotations, tree.annotations);
-            iterateAndAccept(that.bounds, tree.bounds);
+            accept(that.annotations, tree.annotations);
+            accept(that.bounds, tree.bounds);
         }
 
         @Override
@@ -552,7 +555,7 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.JCModifiers tree = (JCTree.JCModifiers) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.annotations, tree.annotations);
+            accept(that.annotations, tree.annotations);
         }
 
         public void visitAnnotation(JCTree.JCAnnotation that) {
@@ -560,14 +563,14 @@ public final class PositionUpdater extends TreeScanner {
             that.pos = tree.pos;
             
             accept(that.annotationType, tree.annotationType);
-            iterateAndAccept(that.args, tree.args);
+            accept(that.args, tree.args);
         }
 
         public void visitAnnotatedType(JCTree.JCAnnotatedType that) {
             JCTree.JCAnnotatedType tree = (JCTree.JCAnnotatedType) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.annotations, tree.annotations);
+            accept(that.annotations, tree.annotations);
             accept(that.underlyingType, tree.underlyingType);
         }
 
@@ -578,7 +581,7 @@ public final class PositionUpdater extends TreeScanner {
             JCTree.LetExpr tree = (JCTree.LetExpr) expected;
             that.pos = tree.pos;
             
-            iterateAndAccept(that.defs, tree.defs);
+            accept(that.defs, tree.defs);
             accept(that.expr, tree.expr);
         }
     }

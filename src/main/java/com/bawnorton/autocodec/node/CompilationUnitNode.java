@@ -21,11 +21,11 @@ public final class CompilationUnitNode extends TreeNode implements ImportFinder 
         List<ClassDeclNode> classes = List.nil();
         importIndex = 0;
         for (JCTree definition : definitions) {
-            if (definition.getKind() == Tree.Kind.IMPORT) {
+            if (definition instanceof JCTree.JCImport importTree) {
                 importIndex++;
-                imports = imports.append(new ImportNode((JCTree.JCImport) definition));
-            } else if (definition.getKind() == Tree.Kind.CLASS) {
-                classes = classes.append(new ClassDeclNode((JCTree.JCClassDecl) definition));
+                imports = imports.append(new ImportNode(importTree));
+            } else if (definition instanceof JCTree.JCClassDecl classDecl) {
+                classes = classes.append(new ClassDeclNode(classDecl));
             }
         }
         this.imports = imports;

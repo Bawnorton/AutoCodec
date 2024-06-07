@@ -2,6 +2,7 @@ package com.bawnorton.autocodec.node.finder;
 
 import com.bawnorton.autocodec.node.MethodDeclNode;
 import com.bawnorton.autocodec.node.VariableDeclNode;
+import com.bawnorton.autocodec.util.TypeUtils;
 import com.sun.tools.javac.code.Type;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface MethodFinder {
         List<MethodDeclNode> methods = getMethods();
         for (MethodDeclNode method : methods) {
             if (!method.getName().equals(name)) continue;
-            if (!method.getReturnType().equals(returnType)) continue;
+            if (!TypeUtils.equal(method.getReturnType(), returnType)) continue;
 
             List<VariableDeclNode> methodParameters = method.getParameters();
             if (methodParameters.size() != parameterTypes.size()) continue;

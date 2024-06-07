@@ -7,6 +7,7 @@ import com.google.auto.service.AutoService;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.code.Types;
+import com.sun.tools.javac.parser.ParserFactory;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
@@ -40,7 +41,8 @@ public class AutoCodecProcessor extends AbstractProcessor {
         Names names = Names.instance(context);
         Symtab symtab = Symtab.instance(context);
         Types types = Types.instance(context);
-        this.processingContext = new ProcessingContext(treeMaker, names, symtab, types, processingEnv.getMessager());
+        ParserFactory parserFactory = ParserFactory.instance(context);
+        this.processingContext = new ProcessingContext(treeMaker, names, symtab, types, parserFactory, processingEnv.getMessager());
     }
 
     @Override

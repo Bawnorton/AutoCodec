@@ -67,7 +67,6 @@ public final class ClassConstructorCreator extends ConstructorCreator {
                 createPartialParentCallingCtor(context, superCall, includedFields, unmatchedFields);
                 return;
             }
-
         }
         // assign fields
         createFieldAssigningCtor(context, includedFields);
@@ -136,7 +135,7 @@ public final class ClassConstructorCreator extends ConstructorCreator {
 
     private void addFieldsToCtorBody(ProcessingContext context, List<IncludedField> includedFields, BlockNode.Builder bodyBuilder) {
         for (IncludedField includedField : includedFields) {
-            VariableDeclNode field = includedField.variableDeclNode();
+            VariableDeclNode field = includedField.fieldNode();
 
             // this.field = field
             FieldAccessNode assignmentNode = FieldAccessNode.builder(context)
@@ -186,7 +185,7 @@ public final class ClassConstructorCreator extends ConstructorCreator {
             for (int i = 0; i < parameters.size(); i++) {
                 Symbol.VarSymbol parameter = parameters.get(i);
                 IncludedField includedField = includedFields.get(i);
-                VariableDeclNode field = includedField.variableDeclNode();
+                VariableDeclNode field = includedField.fieldNode();
 
                 if (!field.sameNameAndType(parameter)) {
                     foundValidParentCtor = false;
@@ -247,7 +246,7 @@ public final class ClassConstructorCreator extends ConstructorCreator {
                 boolean found = false;
                 List<IncludedField> accountedFields = new ArrayList<>();
                 for (IncludedField includedField : includedFields) {
-                    VariableDeclNode field = includedField.variableDeclNode();
+                    VariableDeclNode field = includedField.fieldNode();
 
                     if (field.sameNameAndType(parameter)) {
                         arguments.add(IdentNode.of(context, field.getName()));
@@ -322,7 +321,7 @@ public final class ClassConstructorCreator extends ConstructorCreator {
     private List<VariableDeclNode> fieldsToParameters(ProcessingContext context, List<IncludedField> matchedFields) {
         List<VariableDeclNode> parameters = new ArrayList<>();
         for (IncludedField matched : matchedFields) {
-            VariableDeclNode field = matched.variableDeclNode();
+            VariableDeclNode field = matched.fieldNode();
             VariableDeclNode parameter = VariableDeclNode.builder(context)
                     .modifiers(Flags.PARAMETER)
                     .name(field.getName())

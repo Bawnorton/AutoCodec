@@ -3,24 +3,27 @@ package com.bawnorton.autocodec.codec;
 import com.bawnorton.autocodec.node.FieldAccessNode;
 import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.tools.javac.code.Type;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public final class CodecLookup {
     private static final Map<String, CodecLookupFunction> CODEC_LOOKUP = new HashMap<>();
 
     static {
-        CODEC_LOOKUP.put("java.lang.Integer", forName("INT"));
-        CODEC_LOOKUP.put("java.lang.Long", forName("LONG"));
-        CODEC_LOOKUP.put("java.lang.Float", forName("FLOAT"));
-        CODEC_LOOKUP.put("java.lang.Double", forName("DOUBLE"));
-        CODEC_LOOKUP.put("java.lang.Boolean", forName("BOOL"));
-        CODEC_LOOKUP.put("java.lang.Byte", forName("BYTE"));
-        CODEC_LOOKUP.put("java.lang.Short", forName("SHORT"));
-        CODEC_LOOKUP.put("java.lang.String", forName("STRING"));
-        CODEC_LOOKUP.put("java.nio.ByteBuffer", forName("BYTE_BUFFER"));
-        CODEC_LOOKUP.put("java.util.stream.IntStream", forName("INT_STREAM"));
-        CODEC_LOOKUP.put("java.util.stream.LongStream", forName("LONG_STREAM"));
+        registerCodec(Integer.class, forName("INT"));
+        registerCodec(Long.class, forName("LONG"));
+        registerCodec(Float.class, forName("FLOAT"));
+        registerCodec(Double.class, forName("DOUBLE"));
+        registerCodec(Boolean.class, forName("BOOL"));
+        registerCodec(Byte.class, forName("BYTE"));
+        registerCodec(Short.class, forName("SHORT"));
+        registerCodec(String.class, forName("STRING"));
+        registerCodec(ByteBuffer.class, forName("BYTE_BUFFER"));
+        registerCodec(IntStream.class, forName("INT_STREAM"));
+        registerCodec(LongStream.class, forName("LONG_STREAM"));
     }
 
     public static FieldAccessNode lookupCodec(ProcessingContext context, Type type) {
@@ -33,6 +36,10 @@ public final class CodecLookup {
 
     public static void registerCodec(String typeName, CodecLookupFunction codecLookupFunction) {
         CODEC_LOOKUP.put(typeName, codecLookupFunction);
+    }
+
+    public static void registerCodec(Class<?> type, CodecLookupFunction codecLookupFunction) {
+        registerCodec(type.getName(), codecLookupFunction);
     }
 
     private static CodecLookupFunction forName(String name) {

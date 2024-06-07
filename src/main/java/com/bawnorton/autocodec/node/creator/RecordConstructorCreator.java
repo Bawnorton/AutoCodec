@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class RecordConstructorCreator extends ConstructorCreator {
@@ -52,7 +51,7 @@ public final class RecordConstructorCreator extends ConstructorCreator {
     public void createCtorForFields(ProcessingContext context, List<IncludedField> includedFields) {
         List<VariableDeclNode> parameters = new ArrayList<>();
         for (IncludedField includedField : includedFields) {
-            VariableDeclNode field = includedField.variableDeclNode();
+            VariableDeclNode field = includedField.fieldNode();
             VariableDeclNode parameter = VariableDeclNode.builder(context)
                     .modifiers(Flags.PARAMETER)
                     .name(field.getName())

@@ -2,8 +2,8 @@ package com.bawnorton.autocodec.tree;
 
 import com.bawnorton.autocodec.AutoCodec;
 import com.bawnorton.autocodec.Ignore;
-import com.bawnorton.autocodec.Optional;
-import com.bawnorton.autocodec.codec.CodecLookup;
+import com.bawnorton.autocodec.OptionalEntry;
+import com.bawnorton.autocodec.codec.CodecReferenceCreator;
 import com.bawnorton.autocodec.codec.CodecReference;
 import com.bawnorton.autocodec.node.*;
 import com.bawnorton.autocodec.node.creator.ConstructorCreator;
@@ -49,6 +49,14 @@ public class CodecAdder extends NodeVisitor {
     protected void visitCompilationUnitNode(CompilationUnitNode compilationUnitNode) {
         for (String importPath : NEEDED_IMPORTS) {
             createImportIfMissing(compilationUnitNode, importPath);
+        }
+        for (ClassDeclNode classDeclNode : compilationUnitNode.getClasses()) {
+            if (!classDeclNode.annotationPresent(AutoCodec.class)) continue;
+
+            List<IncludedField> includedFields = getIncludedFields(classDeclNode);
+            if (includedFields.stream().anyMatch(IncludedField::isOptional)) {
+                createImportIfMissing(compilationUnitNode, "java.util.Optional");
+            }
         }
     }
 
@@ -100,7 +108,12 @@ public class CodecAdder extends NodeVisitor {
 
         List<CodecReference> includedCodecs = new ArrayList<>();
         for (IncludedField includedField : includedFields) {
-            includedCodecs.add(createCodecReference(classDeclNode, includedField));
+            if(!classDeclNode.isRecord()) {
+                createGetterIfMissing(classDeclNode, includedField);
+            }
+
+            CodecReferenceCreator creator = new CodecReferenceCreator(holder.getContext(), classDeclNode, includedField);
+            includedCodecs.add(creator.createReference());
         }
 
         FieldAccessNode instanceGroupReferenceNode = FieldAccessNode.builder(holder.getContext())
@@ -171,52 +184,10 @@ public class CodecAdder extends NodeVisitor {
                 .build();
     }
 
-    private CodecReference createCodecReference(ClassDeclNode classDeclNode, IncludedField includedField) {
-        if(!classDeclNode.isRecord()) {
-            createGetterIfMissing(classDeclNode, includedField);
-        }
-
-        VariableDeclNode field = includedField.variableDeclNode();
-        boolean isRequired = !includedField.optional();
-
-        FieldAccessNode fieldOfReferenceNode = FieldAccessNode.builder(holder.getContext())
-                .selected(CodecLookup.lookupCodec(holder.getContext(), field.getBoxedType(holder.types())))
-                .name("fieldOf")
-                .build();
-
-        LiteralNode literalFieldNameNode = LiteralNode.builder(holder.getContext())
-                .value(field.getName())
-                .build();
-
-        MethodInvocationNode fieldOfInvocationNode = MethodInvocationNode.builder(holder.getContext())
-                .methodSelect(fieldOfReferenceNode)
-                .argument(literalFieldNameNode)
-                .build();
-
-        FieldAccessNode forGetterReferenceNode = FieldAccessNode.builder(holder.getContext())
-                .selected(fieldOfInvocationNode)
-                .name("forGetter")
-                .build();
-
-        MemberReferenceNode selfFieldReferenceNode = MemberReferenceNode.builder(holder.getContext())
-                .mode(MemberReferenceTree.ReferenceMode.INVOKE)
-                .name(field.getName())
-                .expression(classDeclNode.getName())
-                .build();
-
-        MethodInvocationNode forGetterInvocationNode = MethodInvocationNode.builder(holder.getContext())
-                .methodSelect(forGetterReferenceNode)
-                .typeArgument(classDeclNode)
-                .argument(selfFieldReferenceNode)
-                .build();
-
-        return new CodecReference(holder.getContext(), field, forGetterInvocationNode);
-    }
-
     private void createConstructorIfMissing(ClassDeclNode classDeclNode, List<IncludedField> includedFields) {
         List<Type> parameterTypes = new ArrayList<>();
         for (IncludedField includedField : includedFields) {
-            parameterTypes.add(includedField.variableDeclNode().getType());
+            parameterTypes.add(includedField.fieldNode().getType());
         }
 
         MethodDeclNode constructor = classDeclNode.findConstructor(parameterTypes);
@@ -227,10 +198,10 @@ public class CodecAdder extends NodeVisitor {
     }
 
     private void createGetterIfMissing(ClassDeclNode classDeclNode, IncludedField includedField) {
-        VariableDeclNode fieldNode = includedField.variableDeclNode();
+        VariableDeclNode fieldNode = includedField.fieldNode();
         MethodDeclNode fieldGetter = classDeclNode.findMethod(fieldNode.getName(), fieldNode.getType());
         if(fieldGetter == null) {
-            VariableDeclNode field = includedField.variableDeclNode();
+            VariableDeclNode field = includedField.fieldNode();
 
             ReturnNode returnFieldNode = ReturnNode.builder(holder.getContext())
                     .expression(IdentNode.of(holder.getContext(), field.getName()))
@@ -259,7 +230,7 @@ public class CodecAdder extends NodeVisitor {
             if (field.isStatic()) continue;
             if (field.annotationPresent(Ignore.class)) continue;
 
-            included.add(new IncludedField(field, field.annotationPresent(Optional.class)));
+            included.add(new IncludedField(field, field.getAnnotation(OptionalEntry.class)));
         }
 
         return included;

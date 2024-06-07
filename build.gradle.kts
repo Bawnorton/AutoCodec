@@ -13,7 +13,8 @@ var exports = listOf(
     "jdk.compiler/com.sun.tools.javac.util",
     "jdk.compiler/com.sun.tools.javac.file",
     "jdk.compiler/com.sun.tools.javac.processing",
-    "jdk.compiler/com.sun.tools.javac.tree"
+    "jdk.compiler/com.sun.tools.javac.tree",
+    "jdk.compiler/com.sun.tools.javac.parser",
 )
 var exportArgs = exports.flatMap { listOf("--add-exports", "$it=ALL-UNNAMED") }
 

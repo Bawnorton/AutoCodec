@@ -16,6 +16,14 @@ public final class LiteralNode extends ExpressionNode {
         return literal;
     }
 
+    public <T> T getValue(Class<T> type) {
+        return type.cast(literal.value);
+    }
+
+    public static LiteralNode of(ProcessingContext context, Object value) {
+        return new LiteralNode(context.treeMaker().Literal(value));
+    }
+
     public static LiteralNode nullLiteral(ProcessingContext context) {
         return new LiteralNode(context.treeMaker().Literal(TypeTag.BOT, null));
     }
@@ -36,28 +44,5 @@ public final class LiteralNode extends ExpressionNode {
         if (value == null) return nullLiteral(context);
 
         return new LiteralNode(context.treeMaker().Literal(typeTag, value));
-    }
-
-    public static Builder builder(ProcessingContext context) {
-        return new Builder(context);
-    }
-
-    public static class Builder {
-        private final ProcessingContext context;
-        private Object value;
-
-        private Builder(ProcessingContext context) {
-            this.context = context;
-        }
-
-        public Builder value(Object value) {
-            this.value = value;
-            return this;
-        }
-
-        public LiteralNode build() {
-            JCTree.JCLiteral literal = context.treeMaker().Literal(value);
-            return new LiteralNode(literal);
-        }
     }
 }

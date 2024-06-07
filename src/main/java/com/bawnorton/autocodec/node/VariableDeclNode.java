@@ -55,6 +55,10 @@ public final class VariableDeclNode extends StatementNode {
         return annotations.stream().anyMatch(annotationNode -> annotationNode.isOfType(annotation));
     }
 
+    public AnnotationNode getAnnotation(Class<? extends Annotation> annotation) {
+        return annotations.stream().filter(annotationNode -> annotationNode.isOfType(annotation)).findFirst().orElse(null);
+    }
+
     public static Builder builder(ProcessingContext context) {
         return new Builder(context);
     }
@@ -87,7 +91,7 @@ public final class VariableDeclNode extends StatementNode {
         private JCTree.JCExpression primitiveType;
         private Name typeName;
         private Name enclosingTypeName;
-        private List<JCTree.JCClassDecl> genericParams = null;
+        private List<Type> genericParams = null;
         private boolean implicitType;
 
         private long flags;
@@ -143,12 +147,16 @@ public final class VariableDeclNode extends StatementNode {
             return this;
         }
 
-        public Builder genericParam(JCTree.JCClassDecl genericParam) {
+        public Builder genericParam(Type genericParam) {
             if (genericParams == null) {
                 genericParams = List.nil();
             }
             genericParams = genericParams.append(genericParam);
             return this;
+        }
+
+        public Builder genericParam(JCTree.JCClassDecl genericParam) {
+            return genericParam(genericParam.sym.type);
         }
 
         public Builder genericParam(ClassDeclNode genericParam) {
@@ -214,8 +222,8 @@ public final class VariableDeclNode extends StatementNode {
                 type = treeMaker().Ident(typeName);
             } else if (typeName != null) {
                 List<JCTree.JCExpression> genericArgs = List.nil();
-                for (JCTree.JCClassDecl genericParam : genericParams) {
-                    genericArgs = genericArgs.append(treeMaker().Ident(genericParam.name));
+                for (Type genericType : genericParams) {
+                    genericArgs = genericArgs.append(treeMaker().Ident(genericType.tsym));
                 }
                 JCTree.JCIdent typeIdent = treeMaker().Ident(typeName);
                 if (enclosingTypeName != null) {
@@ -252,8 +260,8 @@ public final class VariableDeclNode extends StatementNode {
                     Symbol.ModuleSymbol moduleSymbol = symtab().enterModule(module);
                     Symbol.ClassSymbol classSymbol = symtab().enterClass(moduleSymbol, className);
                     List<Type> typeArgs = List.nil();
-                    for (JCTree.JCClassDecl genericParam : genericParams) {
-                        typeArgs = typeArgs.append(genericParam.sym.type);
+                    for (Type genericType : genericParams) {
+                        typeArgs = typeArgs.append(genericType);
                     }
 
                     Type enclosingType;

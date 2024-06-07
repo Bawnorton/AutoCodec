@@ -1,7 +1,7 @@
 import com.bawnorton.autocodec.AutoCodec;
 import com.bawnorton.autocodec.Ignore;
-import com.bawnorton.autocodec.Optional;
+import com.bawnorton.autocodec.OptionalEntry;
 
 @AutoCodec
-public record Simple(String included, @Optional String optional, @Ignore Integer notIncluded) {
+public record Simple(String included, @OptionalEntry String optional, @Ignore Integer notIncluded) {
 }

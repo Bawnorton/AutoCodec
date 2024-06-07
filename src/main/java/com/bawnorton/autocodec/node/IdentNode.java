@@ -16,6 +16,10 @@ public final class IdentNode extends ExpressionNode {
         return ident;
     }
 
+    public Name getName() {
+        return ident.name;
+    }
+
     public static IdentNode of(ProcessingContext context, Name name) {
         return builder(context).name(name).build();
     }

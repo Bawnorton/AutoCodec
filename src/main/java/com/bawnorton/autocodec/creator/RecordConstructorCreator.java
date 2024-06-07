@@ -1,4 +1,4 @@
-package com.bawnorton.autocodec.node.creator;
+package com.bawnorton.autocodec.creator;
 
 import com.bawnorton.autocodec.Ignore;
 import com.bawnorton.autocodec.node.*;

@@ -1,8 +1,8 @@
 package com.bawnorton.autocodec.node;
 
-import com.bawnorton.autocodec.node.creator.ClassConstructorCreator;
-import com.bawnorton.autocodec.node.creator.ConstructorCreator;
-import com.bawnorton.autocodec.node.creator.RecordConstructorCreator;
+import com.bawnorton.autocodec.creator.ClassConstructorCreator;
+import com.bawnorton.autocodec.creator.ConstructorCreator;
+import com.bawnorton.autocodec.creator.RecordConstructorCreator;
 import com.bawnorton.autocodec.node.finder.MethodFinder;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Type;

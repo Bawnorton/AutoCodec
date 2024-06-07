@@ -2,6 +2,7 @@ package com.bawnorton.autocodec.util;
 
 import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.code.Types;
+import com.sun.tools.javac.parser.ParserFactory;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Names;
 import javax.tools.Diagnostic;
@@ -33,15 +34,19 @@ public class ContextHolder {
         return context.types();
     }
 
-    public void printNote(String message) {
-        context.messager().printMessage(Diagnostic.Kind.NOTE, message);
+    public ParserFactory parserFactory() {
+        return context.parserFactory();
     }
 
-    public void printWarning(String message) {
-        context.messager().printMessage(Diagnostic.Kind.WARNING, message);
+    public void printNote(String message, Object... args) {
+        context.messager().printMessage(Diagnostic.Kind.NOTE, message.formatted(args));
     }
 
-    public void printError(String message) {
-        context.messager().printMessage(Diagnostic.Kind.ERROR, message);
+    public void printWarning(String message, Object... args) {
+        context.messager().printMessage(Diagnostic.Kind.WARNING, message.formatted(args));
+    }
+
+    public void printError(String message, Object... args) {
+        context.messager().printMessage(Diagnostic.Kind.ERROR, message.formatted(args));
     }
 }

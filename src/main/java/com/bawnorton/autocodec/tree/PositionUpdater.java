@@ -2,159 +2,584 @@ package com.bawnorton.autocodec.tree;
 
 import com.bawnorton.autocodec.util.ContextHolder;
 import com.bawnorton.autocodec.util.ProcessingContext;
-import com.sun.source.tree.BlockTree;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.LambdaExpressionTree;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.VariableTree;
-import com.sun.source.util.TreeScanner;
+import com.sun.tools.javac.parser.JavacParser;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.TreeScanner;
+import java.util.List;
 
-public final class PositionUpdater extends ContextHolder {
+public final class PositionUpdater extends TreeScanner {
+    private final ContextHolder holder;
+
     public PositionUpdater(ProcessingContext context) {
-        super(context);
+        this.holder = new ContextHolder(context);
     }
 
-    public void updatePositions(JCTree.JCClassDecl classDecl, int startPosition) {
-        classDecl.accept(new PositionUpdatingScanner(), startPosition);
+    @Override
+    public void visitTopLevel(JCTree.JCCompilationUnit tree) {
+        JavacParser parser = holder.parserFactory().newParser(tree.toString(), false, false, false);
+        JCTree.JCCompilationUnit expected = parser.parseCompilationUnit();
+        tree.accept(new PositionCopyingScanner(expected));
     }
 
-    private static class PositionUpdatingScanner extends TreeScanner<Void, Integer> {
-        @Override
-        public Void visitClass(ClassTree node, Integer startPosition) {
-            JCTree.JCClassDecl classDecl = (JCTree.JCClassDecl) node;
-            classDecl.pos = startPosition;
-            int newPosition = startPosition + 1;
+    /**
+     * Copy the positions from the expected tree to the actual tree.
+     */
+    private static class PositionCopyingScanner extends JCTree.Visitor {
+        private JCTree expected;
 
-            classDecl.mods.accept(this, newPosition);
-            newPosition += classDecl.mods.toString().length();
+        public PositionCopyingScanner(JCTree expected) {
+            this.expected = expected;
+        }
+        
+        private <T extends JCTree> void accept(T actual, T expected) {
+            if (actual == null) return;
+            
+            this.expected = expected;
+            actual.accept(this);
+        }
 
-            for (JCTree typeParameter : classDecl.typarams) {
-                typeParameter.accept(this, newPosition);
-                newPosition += typeParameter.toString().length();
+        private <T extends JCTree> void iterateAndAccept(List<T> actual, List<T> expected) {
+            if(actual == null || expected == null) return;
+            
+            for(int i = 0; i < actual.size(); i++) {
+                accept(actual.get(i), expected.get(i));
             }
-
-            if (classDecl.extending != null) {
-                classDecl.extending.accept(this, newPosition);
-                newPosition += classDecl.extending.toString().length();
-            }
-
-            for (JCTree implementing : classDecl.implementing) {
-                implementing.accept(this, newPosition);
-                newPosition += implementing.toString().length();
-            }
-
-            for (JCTree member : classDecl.defs) {
-                member.accept(this, newPosition);
-                newPosition += member.toString().length();
-            }
-
-            return null;
         }
 
         @Override
-        public Void visitMethod(MethodTree node, Integer integer) {
-            JCTree.JCMethodDecl methodDecl = (JCTree.JCMethodDecl) node;
-            methodDecl.pos = integer;
-            int newPosition = integer + 1;
+        public void visitTopLevel(JCTree.JCCompilationUnit that) {
+            JCTree.JCCompilationUnit tree = (JCTree.JCCompilationUnit) expected;
+            that.pos = tree.pos;
 
-            methodDecl.mods.accept(this, newPosition);
-            newPosition += methodDecl.mods.toString().length();
-
-            if (methodDecl.restype != null) {
-                methodDecl.restype.accept(this, newPosition);
-                newPosition += methodDecl.restype.toString().length();
-            }
-
-            for (JCTree typeParameter : methodDecl.typarams) {
-                typeParameter.accept(this, newPosition);
-                newPosition += typeParameter.toString().length();
-            }
-
-            for (JCTree parameter : methodDecl.params) {
-                parameter.accept(this, newPosition);
-                newPosition += parameter.toString().length();
-            }
-
-            if (methodDecl.defaultValue != null) {
-                methodDecl.defaultValue.accept(this, newPosition);
-                newPosition += methodDecl.defaultValue.toString().length();
-            }
-
-            if (methodDecl.body != null) {
-                methodDecl.body.accept(this, newPosition);
-            }
-
-            return null;
+            iterateAndAccept(that.defs, tree.defs);
         }
 
         @Override
-        public Void visitMethodInvocation(MethodInvocationTree node, Integer integer) {
-            JCTree.JCMethodInvocation methodInvocation = (JCTree.JCMethodInvocation) node;
-            methodInvocation.pos = integer;
-            int newPosition = integer + 1;
+        public void visitPackageDef(JCTree.JCPackageDecl that) {
+            JCTree.JCPackageDecl tree = (JCTree.JCPackageDecl) expected;
+            that.pos = tree.pos;
 
-            methodInvocation.meth.accept(this, newPosition);
-            newPosition += methodInvocation.meth.toString().length();
-
-            for (JCTree argument : methodInvocation.args) {
-                argument.accept(this, newPosition);
-                newPosition += argument.toString().length();
-            }
-
-            return null;
+            iterateAndAccept(that.annotations, tree.annotations);
+            accept(that.pid, tree.pid);
         }
 
         @Override
-        public Void visitBlock(BlockTree node, Integer integer) {
-            JCTree.JCBlock block = (JCTree.JCBlock) node;
-            block.pos = integer;
-            int newPosition = integer;
+        public void visitModuleDef(JCTree.JCModuleDecl that) {
+            JCTree.JCModuleDecl tree = (JCTree.JCModuleDecl) expected;
+            that.pos = tree.pos;
 
-            for (JCTree statement : block.stats) {
-                statement.accept(this, newPosition);
-                newPosition += statement.toString().length();
-            }
-
-            return null;
+            accept(that.mods, tree.mods);
+            accept(that.qualId, tree.qualId);
+            iterateAndAccept(that.directives, tree.directives);
         }
 
         @Override
-        public Void visitLambdaExpression(LambdaExpressionTree node, Integer integer) {
-            JCTree.JCLambda lambda = (JCTree.JCLambda) node;
-            lambda.pos = integer;
-            int newPosition = integer;
+        public void visitExports(JCTree.JCExports that) {
+            JCTree.JCExports tree = (JCTree.JCExports) expected;
+            that.pos = tree.pos;
 
-            for (JCTree parameter : lambda.params) {
-                parameter.accept(this, newPosition);
-                newPosition += parameter.toString().length();
-            }
-
-            lambda.body.accept(this, newPosition);
-
-            return null;
+            accept(that.qualid, tree.qualid);
+            iterateAndAccept(that.moduleNames, tree.moduleNames);
         }
 
         @Override
-        public Void visitVariable(VariableTree node, Integer integer) {
-            JCTree.JCVariableDecl variableDecl = (JCTree.JCVariableDecl) node;
-            variableDecl.pos = integer;
-            int newPosition = integer;
+        public void visitOpens(JCTree.JCOpens that) {
+            JCTree.JCOpens tree = (JCTree.JCOpens) expected;
+            that.pos = tree.pos;
 
-            variableDecl.mods.accept(this, newPosition);
-            newPosition += variableDecl.mods.toString().length();
+            accept(that.qualid, tree.qualid);
+            iterateAndAccept(that.moduleNames, tree.moduleNames);
+        }
 
-            if (variableDecl.vartype != null) {
-                variableDecl.vartype.accept(this, newPosition);
-                newPosition += variableDecl.vartype.toString().length();
+        @Override
+        public void visitProvides(JCTree.JCProvides that) {
+            JCTree.JCProvides tree = (JCTree.JCProvides) expected;
+            that.pos = tree.pos;
+
+            accept(that.serviceName, tree.serviceName);
+            iterateAndAccept(that.implNames, tree.implNames);
+        }
+
+        @Override
+        public void visitRequires(JCTree.JCRequires that) {
+            JCTree.JCRequires tree = (JCTree.JCRequires) expected;
+            that.pos = tree.pos;
+
+            accept(that.moduleName, tree.moduleName);
+        }
+
+        @Override
+        public void visitUses(JCTree.JCUses that) {
+            JCTree.JCUses tree = (JCTree.JCUses) expected;
+            that.pos = tree.pos;
+
+            accept(that.qualid, tree.qualid);
+        }
+
+        @Override
+        public void visitImport(JCTree.JCImport that) {
+            JCTree.JCImport tree = (JCTree.JCImport) expected;
+            that.pos = tree.pos;
+
+            accept(that.qualid, tree.qualid);
+        }
+
+        @Override
+        public void visitClassDef(JCTree.JCClassDecl that) {
+            JCTree.JCClassDecl tree = (JCTree.JCClassDecl) expected;
+            that.pos = tree.pos;
+
+            accept(that.mods, tree.mods);
+            iterateAndAccept(that.typarams, tree.typarams);
+            accept(that.extending, tree.extending);
+            iterateAndAccept(that.implementing, tree.implementing);
+            iterateAndAccept(that.permitting, tree.permitting);
+            iterateAndAccept(that.defs, tree.defs);
+        }
+
+        @Override
+        public void visitMethodDef(JCTree.JCMethodDecl that) {
+            JCTree.JCMethodDecl tree = (JCTree.JCMethodDecl) expected;
+            that.pos = tree.pos;
+
+            accept(that.mods, tree.mods);
+            accept(that.restype, tree.restype);
+            iterateAndAccept(that.typarams, tree.typarams);
+            accept(that.recvparam, tree.recvparam);
+            iterateAndAccept(that.params, tree.params);
+            iterateAndAccept(that.thrown, tree.thrown);
+            accept(that.defaultValue, tree.defaultValue);
+            accept(that.body, tree.body);
+        }
+
+        @Override
+        public void visitVarDef(JCTree.JCVariableDecl that) {
+            JCTree.JCVariableDecl tree = (JCTree.JCVariableDecl) expected;
+            that.pos = tree.pos;
+
+            accept(that.mods, tree.mods);
+            accept(that.vartype, tree.vartype);
+            accept(that.nameexpr, tree.nameexpr);
+            accept(that.init, tree.init);
+        }
+
+        @Override
+        public void visitSkip(JCTree.JCSkip that) {
+        }
+
+        @Override
+        public void visitBlock(JCTree.JCBlock that) {
+            JCTree.JCBlock tree = (JCTree.JCBlock) expected;
+            that.pos = tree.pos;
+
+            iterateAndAccept(that.stats, tree.stats);
+        }
+
+        @Override
+        public void visitDoLoop(JCTree.JCDoWhileLoop that) {
+            JCTree.JCDoWhileLoop tree = (JCTree.JCDoWhileLoop) expected;
+            that.pos = tree.pos;
+
+            accept(that.body, tree.body);
+            accept(that.cond, tree.cond);
+        }
+
+        @Override
+        public void visitWhileLoop(JCTree.JCWhileLoop that) {
+            JCTree.JCWhileLoop tree = (JCTree.JCWhileLoop) expected;
+            that.pos = tree.pos;
+
+            accept(that.cond, tree.cond);
+            accept(that.body, tree.body);
+        }
+
+        @Override
+        public void visitForLoop(JCTree.JCForLoop that) {
+            JCTree.JCForLoop tree = (JCTree.JCForLoop) expected;
+            that.pos = tree.pos;
+
+            iterateAndAccept(that.init, tree.init);
+            accept(that.cond, tree.cond);
+            iterateAndAccept(that.step, tree.step);
+            accept(that.body, tree.body);
+        }
+
+        @Override
+        public void visitForeachLoop(JCTree.JCEnhancedForLoop that) {
+            JCTree.JCEnhancedForLoop tree = (JCTree.JCEnhancedForLoop) expected;
+            that.pos = tree.pos;
+
+            accept(that.var, tree.var);
+            accept(that.expr, tree.expr);
+            accept(that.body, tree.body);
+        }
+
+        @Override
+        public void visitLabelled(JCTree.JCLabeledStatement that) {
+            JCTree.JCLabeledStatement tree = (JCTree.JCLabeledStatement) expected;
+            that.pos = tree.pos;
+
+            accept(that.body, tree.body);
+        }
+
+        @Override
+        public void visitSwitch(JCTree.JCSwitch that) {
+            JCTree.JCSwitch tree = (JCTree.JCSwitch) expected;
+            that.pos = tree.pos;
+
+            accept(that.selector, tree.selector);
+            iterateAndAccept(that.cases, tree.cases);
+        }
+
+        @Override
+        public void visitCase(JCTree.JCCase that) {
+            JCTree.JCCase tree = (JCTree.JCCase) expected;
+            that.pos = tree.pos;
+
+            iterateAndAccept(that.labels, tree.labels);
+            iterateAndAccept(that.stats, tree.stats);
+        }
+
+        @Override
+        public void visitSwitchExpression(JCTree.JCSwitchExpression that) {
+            JCTree.JCSwitchExpression tree = (JCTree.JCSwitchExpression) expected;
+            that.pos = tree.pos;
+
+            accept(that.selector, tree.selector);
+            iterateAndAccept(that.cases, tree.cases);
+        }
+
+        @Override
+        public void visitSynchronized(JCTree.JCSynchronized that) {
+            JCTree.JCSynchronized tree = (JCTree.JCSynchronized) expected;
+            that.pos = tree.pos;
+
+            accept(that.lock, tree.lock);
+            accept(that.body, tree.body);
+        }
+
+        @Override
+        public void visitTry(JCTree.JCTry that) {
+            JCTree.JCTry tree = (JCTree.JCTry) expected;
+            that.pos = tree.pos;
+
+            iterateAndAccept(that.resources, tree.resources);
+            accept(that.body, tree.body);
+            iterateAndAccept(that.catchers, tree.catchers);
+            accept(that.finalizer, tree.finalizer);
+        }
+
+        @Override
+        public void visitCatch(JCTree.JCCatch that) {
+            JCTree.JCCatch tree = (JCTree.JCCatch) expected;
+            that.pos = tree.pos;
+
+            accept(that.param, tree.param);
+            accept(that.body, tree.body);
+        }
+
+        @Override
+        public void visitConditional(JCTree.JCConditional that) {
+            JCTree.JCConditional tree = (JCTree.JCConditional) expected;
+            that.pos = tree.pos;
+
+            accept(that.cond, tree.cond);
+            accept(that.truepart, tree.truepart);
+            accept(that.falsepart, tree.falsepart);
+        }
+
+        @Override
+        public void visitIf(JCTree.JCIf that) {
+            JCTree.JCIf tree = (JCTree.JCIf) expected;
+            that.pos = tree.pos;
+
+            accept(that.cond, tree.cond);
+            accept(that.thenpart, tree.thenpart);
+            accept(that.elsepart, tree.elsepart);
+        }
+
+        @Override
+        public void visitExec(JCTree.JCExpressionStatement that) {
+            JCTree.JCExpressionStatement tree = (JCTree.JCExpressionStatement) expected;
+            that.pos = tree.pos;
+
+            accept(that.expr, tree.expr);
+        }
+
+        public void visitBreak(JCTree.JCBreak that) {
+        }
+
+        public void visitYield(JCTree.JCYield that) {
+            JCTree.JCYield tree = (JCTree.JCYield) this.expected;
+            that.pos = tree.pos;
+            
+            accept(that.value, tree.value);
+        }
+
+        public void visitContinue(JCTree.JCContinue that) {
+        }
+
+        public void visitReturn(JCTree.JCReturn that) {
+            JCTree.JCReturn tree = (JCTree.JCReturn) expected;
+            that.pos = tree.pos;
+
+            accept(that.expr, tree.expr);
+        }
+
+        public void visitThrow(JCTree.JCThrow that) {
+            JCTree.JCThrow tree = (JCTree.JCThrow) expected;
+            that.pos = tree.pos;
+
+            accept(that.expr, tree.expr);
+        }
+
+        public void visitAssert(JCTree.JCAssert that) {
+            JCTree.JCAssert tree = (JCTree.JCAssert) expected;
+            that.pos = tree.pos;
+            
+            accept(that.cond, tree.cond);
+            accept(that.detail, tree.detail);
+        }
+
+        public void visitApply(JCTree.JCMethodInvocation that) {
+            JCTree.JCMethodInvocation tree = (JCTree.JCMethodInvocation) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.typeargs, tree.typeargs);
+            accept(that.meth, tree.meth);
+            iterateAndAccept(that.args, tree.args);
+        }
+
+        public void visitNewClass(JCTree.JCNewClass that) {
+            JCTree.JCNewClass tree = (JCTree.JCNewClass) expected;
+            that.pos = tree.pos;
+            
+            accept(that.encl, tree.encl);
+            iterateAndAccept(that.typeargs, tree.typeargs);
+            accept(that.clazz, tree.clazz);
+            iterateAndAccept(that.args, tree.args);
+            accept(that.def, tree.def);
+        }
+
+        public void visitNewArray(JCTree.JCNewArray that) {
+            JCTree.JCNewArray tree = (JCTree.JCNewArray) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.annotations, tree.annotations);
+            accept(that.elemtype, tree.elemtype);
+            iterateAndAccept(that.dims, tree.dims);
+            if(that.dimAnnotations != null && tree.dimAnnotations != null) {
+                for(int i = 0; i < that.dimAnnotations.size(); i++) {
+                    iterateAndAccept(that.dimAnnotations.get(i), tree.dimAnnotations.get(i));
+                }
             }
+            iterateAndAccept(that.elems, tree.elems);
+        }
 
-            if (variableDecl.init != null) {
-                variableDecl.init.accept(this, newPosition);
-            }
+        public void visitLambda(JCTree.JCLambda that) {
+            JCTree.JCLambda tree = (JCTree.JCLambda) expected;
+            that.pos = tree.pos;
+            
+            accept(that.body, tree.body);
+            iterateAndAccept(that.params, tree.params);
+        }
 
-            return null;
+        public void visitParens(JCTree.JCParens that) {
+            JCTree.JCParens tree = (JCTree.JCParens) expected;
+            that.pos = tree.pos;
+            
+            accept(that.expr, tree.expr);
+        }
+
+        public void visitAssign(JCTree.JCAssign that) {
+            JCTree.JCAssign tree = (JCTree.JCAssign) expected;
+            that.pos = tree.pos;
+            
+            accept(that.lhs, tree.lhs);
+            accept(that.rhs, tree.rhs);
+        }
+
+        public void visitAssignop(JCTree.JCAssignOp that) {
+            JCTree.JCAssignOp tree = (JCTree.JCAssignOp) expected;
+            that.pos = tree.pos;
+            
+            accept(that.lhs, tree.lhs);
+            accept(that.rhs, tree.rhs);
+        }
+
+        public void visitUnary(JCTree.JCUnary that) {
+            JCTree.JCUnary tree = (JCTree.JCUnary) expected;
+            that.pos = tree.pos;
+            
+            accept(that.arg, tree.arg);
+        }
+
+        public void visitBinary(JCTree.JCBinary that) {
+            JCTree.JCBinary tree = (JCTree.JCBinary) expected;
+            that.pos = tree.pos;
+            
+            accept(that.lhs, tree.lhs);
+            accept(that.rhs, tree.rhs);
+        }
+
+        public void visitTypeCast(JCTree.JCTypeCast that) {
+            JCTree.JCTypeCast tree = (JCTree.JCTypeCast) expected;
+            that.pos = tree.pos;
+            
+            accept(that.clazz, tree.clazz);
+            accept(that.expr, tree.expr);
+        }
+
+        public void visitTypeTest(JCTree.JCInstanceOf that) {
+            JCTree.JCInstanceOf tree = (JCTree.JCInstanceOf) expected;
+            that.pos = tree.pos;
+            
+            accept(that.expr, tree.expr);
+            accept(that.pattern, tree.pattern);
+        }
+
+        public void visitBindingPattern(JCTree.JCBindingPattern that) {
+            JCTree.JCBindingPattern tree = (JCTree.JCBindingPattern) expected;
+            that.pos = tree.pos;
+            
+            accept(that.var, tree.var);
+        }
+
+        @Override
+        public void visitDefaultCaseLabel(JCTree.JCDefaultCaseLabel that) {
+        }
+
+        @Override
+        public void visitParenthesizedPattern(JCTree.JCParenthesizedPattern that) {
+            JCTree.JCParenthesizedPattern tree = (JCTree.JCParenthesizedPattern) expected;
+            that.pos = tree.pos;
+            
+            accept(that.pattern, tree.pattern);
+        }
+
+        @Override
+        public void visitGuardPattern(JCTree.JCGuardPattern that) {
+            JCTree.JCGuardPattern tree = (JCTree.JCGuardPattern) expected;
+            that.pos = tree.pos;
+            
+            accept(that.patt, tree.patt);
+            accept(that.expr, tree.expr);
+        }
+
+        public void visitIndexed(JCTree.JCArrayAccess that) {
+            JCTree.JCArrayAccess tree = (JCTree.JCArrayAccess) expected;
+            that.pos = tree.pos;
+            
+            accept(that.indexed, tree.indexed);
+            accept(that.index, tree.index);
+        }
+
+        public void visitSelect(JCTree.JCFieldAccess that) {
+            JCTree.JCFieldAccess tree = (JCTree.JCFieldAccess) expected;
+            that.pos = tree.pos;
+            
+            accept(that.selected, tree.selected);
+        }
+
+        public void visitReference(JCTree.JCMemberReference that) {
+            JCTree.JCMemberReference tree = (JCTree.JCMemberReference) expected;
+            that.pos = tree.pos;
+            
+            accept(that.expr, tree.expr);
+            iterateAndAccept(that.typeargs, tree.typeargs);
+        }
+
+        public void visitIdent(JCTree.JCIdent that) {
+        }
+
+        public void visitLiteral(JCTree.JCLiteral that) {
+        }
+
+        public void visitTypeIdent(JCTree.JCPrimitiveTypeTree that) {
+        }
+
+        public void visitTypeArray(JCTree.JCArrayTypeTree that) {
+            JCTree.JCArrayTypeTree tree = (JCTree.JCArrayTypeTree) expected;
+            that.pos = tree.pos;
+            
+            accept(that.elemtype, tree.elemtype);
+        }
+
+        public void visitTypeApply(JCTree.JCTypeApply that) {
+            JCTree.JCTypeApply tree = (JCTree.JCTypeApply) expected;
+            that.pos = tree.pos;
+            
+            accept(that.clazz, tree.clazz);
+            iterateAndAccept(that.arguments, tree.arguments);
+        }
+
+        public void visitTypeUnion(JCTree.JCTypeUnion that) {
+            JCTree.JCTypeUnion tree = (JCTree.JCTypeUnion) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.alternatives, tree.alternatives);
+        }
+
+        public void visitTypeIntersection(JCTree.JCTypeIntersection that) {
+            JCTree.JCTypeIntersection tree = (JCTree.JCTypeIntersection) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.bounds, tree.bounds);
+        }
+
+        public void visitTypeParameter(JCTree.JCTypeParameter that) {
+            JCTree.JCTypeParameter tree = (JCTree.JCTypeParameter) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.annotations, tree.annotations);
+            iterateAndAccept(that.bounds, tree.bounds);
+        }
+
+        @Override
+        public void visitWildcard(JCTree.JCWildcard that) {
+            JCTree.JCWildcard tree = (JCTree.JCWildcard) expected;
+            that.pos = tree.pos;
+            
+            accept(that.kind, tree.kind);
+            accept(that.inner, tree.inner);
+        }
+
+        @Override
+        public void visitTypeBoundKind(JCTree.TypeBoundKind that) {
+        }
+
+        public void visitModifiers(JCTree.JCModifiers that) {
+            JCTree.JCModifiers tree = (JCTree.JCModifiers) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.annotations, tree.annotations);
+        }
+
+        public void visitAnnotation(JCTree.JCAnnotation that) {
+            JCTree.JCAnnotation tree = (JCTree.JCAnnotation) expected;
+            that.pos = tree.pos;
+            
+            accept(that.annotationType, tree.annotationType);
+            iterateAndAccept(that.args, tree.args);
+        }
+
+        public void visitAnnotatedType(JCTree.JCAnnotatedType that) {
+            JCTree.JCAnnotatedType tree = (JCTree.JCAnnotatedType) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.annotations, tree.annotations);
+            accept(that.underlyingType, tree.underlyingType);
+        }
+
+        public void visitErroneous(JCTree.JCErroneous that) {
+        }
+
+        public void visitLetExpr(JCTree.LetExpr that) {
+            JCTree.LetExpr tree = (JCTree.LetExpr) expected;
+            that.pos = tree.pos;
+            
+            iterateAndAccept(that.defs, tree.defs);
+            accept(that.expr, tree.expr);
         }
     }
 }

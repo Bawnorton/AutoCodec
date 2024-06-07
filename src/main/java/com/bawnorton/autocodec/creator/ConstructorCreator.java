@@ -1,4 +1,4 @@
-package com.bawnorton.autocodec.node.creator;
+package com.bawnorton.autocodec.creator;
 
 import com.bawnorton.autocodec.node.ClassDeclNode;
 import com.bawnorton.autocodec.util.IncludedField;

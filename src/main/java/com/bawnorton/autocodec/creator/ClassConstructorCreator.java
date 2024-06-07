@@ -1,4 +1,4 @@
-package com.bawnorton.autocodec.node.creator;
+package com.bawnorton.autocodec.creator;
 
 import com.bawnorton.autocodec.node.*;
 import com.bawnorton.autocodec.util.IncludedField;
@@ -79,7 +79,7 @@ public final class ClassConstructorCreator extends ConstructorCreator {
 
         // public ClassName(fields) { this.field = field; ... }
         classDeclNode.addMethod(MethodDeclNode.builder(context)
-                .modifiers(Flags.PUBLIC)
+                .modifiers(Flags.PRIVATE)
                 .name(context.names().init)
                 .params(fieldsToParameters(context, includedFields))
                 .body(body)
@@ -126,7 +126,7 @@ public final class ClassConstructorCreator extends ConstructorCreator {
 
         // public ClassName(fields) { super(); this.field = field; ... }
         classDeclNode.addMethod(MethodDeclNode.builder(context)
-                .modifiers(Flags.PUBLIC)
+                .modifiers(Flags.PRIVATE)
                 .name(context.names().init)
                 .params(fieldsToParameters(context, includedFields))
                 .body(body)

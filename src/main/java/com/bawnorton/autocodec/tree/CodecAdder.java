@@ -3,10 +3,10 @@ package com.bawnorton.autocodec.tree;
 import com.bawnorton.autocodec.AutoCodec;
 import com.bawnorton.autocodec.Ignore;
 import com.bawnorton.autocodec.OptionalEntry;
-import com.bawnorton.autocodec.codec.CodecReferenceCreator;
+import com.bawnorton.autocodec.creator.CodecReferenceCreator;
 import com.bawnorton.autocodec.codec.CodecReference;
 import com.bawnorton.autocodec.node.*;
-import com.bawnorton.autocodec.node.creator.ConstructorCreator;
+import com.bawnorton.autocodec.creator.ConstructorCreator;
 import com.bawnorton.autocodec.util.IncludedField;
 import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.source.tree.MemberReferenceTree;
@@ -37,12 +37,6 @@ public class CodecAdder extends NodeVisitor {
 
         LambdaNode codecCreatorNode = createCodecLambda(classDeclNode);
         classDeclNode.addField(createCodecField(classDeclNode, codecCreatorNode));
-        if(classDeclNode.isRecord()) return;
-
-        // Update positions of class members to ensure the flow calculation does not ignore new parameters
-        // Records already have their positions updated by the compiler
-        PositionUpdater positionUpdater = new PositionUpdater(holder.getContext());
-        positionUpdater.updatePositions(classDeclNode.getTree(), classDeclNode.getTree().getStartPosition());
     }
 
     @Override

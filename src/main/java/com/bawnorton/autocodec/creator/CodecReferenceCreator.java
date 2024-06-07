@@ -1,5 +1,7 @@
-package com.bawnorton.autocodec.codec;
+package com.bawnorton.autocodec.creator;
 
+import com.bawnorton.autocodec.codec.CodecLookup;
+import com.bawnorton.autocodec.codec.CodecReference;
 import com.bawnorton.autocodec.node.*;
 import com.bawnorton.autocodec.node.parser.ExpressionParser;
 import com.bawnorton.autocodec.util.ContextHolder;

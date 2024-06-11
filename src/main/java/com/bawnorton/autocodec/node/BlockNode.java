@@ -1,7 +1,7 @@
 package com.bawnorton.autocodec.node;
 
-import com.bawnorton.autocodec.util.ContextHolder;
-import com.bawnorton.autocodec.util.ProcessingContext;
+import com.bawnorton.autocodec.context.ContextHolder;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
@@ -42,8 +42,8 @@ public final class BlockNode extends StatementNode {
             return statement(statement.getTree());
         }
 
-        public Builder statements(List<JCTree.JCStatement> statements) {
-            this.statements = statements;
+        public Builder statements(List<StatementNode> statements) {
+            statements.forEach(this::statement);
             return this;
         }
 

@@ -28,9 +28,9 @@ public abstract class AutoCodecTestBase {
         return compilation;
     }
 
-    protected JavaFileObject getGeneratedFile(Compilation compilation, String className) {
+    protected JavaFileObject getGeneratedFile(Compilation compilation, String resourceName) {
         return compilation
-                .generatedFile(StandardLocation.CLASS_OUTPUT, "%s.class".formatted(className))
+                .generatedFile(StandardLocation.CLASS_OUTPUT, "%s.class".formatted(resourceName))
                 .orElseThrow(() -> new AssertionError("No output file found"));
     }
 
@@ -48,15 +48,15 @@ public abstract class AutoCodecTestBase {
         }
     }
 
-    protected ClassNode compileAndRead(String resourceName, String outputName) {
+    protected ClassNode compileAndRead(String resourceName) {
         Compilation compilation = compile(resourceName);
         assertThat(compilation).succeeded();
-        JavaFileObject output = getGeneratedFile(compilation, outputName);
+        JavaFileObject output = getGeneratedFile(compilation, resourceName);
         return readClassNode(output);
     }
 
-    protected void basicTest(String resourceName, String outputName) {
-        ClassNode classNode = compileAndRead(resourceName, outputName);
+    protected void basicTest(String resourceName) {
+        ClassNode classNode = compileAndRead(resourceName);
         classNode.fields.stream()
                 .filter(fieldNode -> fieldNode.name.equals("CODEC"))
                 .findFirst()

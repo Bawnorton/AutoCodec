@@ -1,7 +1,7 @@
 package com.bawnorton.autocodec.codec;
 
 import com.bawnorton.autocodec.node.FieldAccessNode;
-import com.bawnorton.autocodec.util.ProcessingContext;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.sun.tools.javac.code.Type;
 import java.nio.ByteBuffer;
 import java.util.HashMap;

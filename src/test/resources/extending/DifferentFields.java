@@ -1,15 +1,14 @@
+package extending;
+
 import com.bawnorton.autocodec.AutoCodec;
 
 @AutoCodec
-public class DifferentFields extends Parent {
+public class DifferentFields extends DifferentFieldsParent {
     private String s1;
     private String s2;
+
 }
 
-class Parent {
+class DifferentFieldsParent {
     private Integer i1;
-
-    public Parent(Integer i1) {
-        this.i1 = i1;
-    }
 }

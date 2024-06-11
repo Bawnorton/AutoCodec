@@ -1,7 +1,7 @@
 package com.bawnorton.autocodec.node;
 
-import com.bawnorton.autocodec.util.ContextHolder;
-import com.bawnorton.autocodec.util.ProcessingContext;
+import com.bawnorton.autocodec.context.ContextHolder;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
@@ -111,6 +111,10 @@ public final class MethodDeclNode extends TreeNode {
 
         public Builder returnType(Type returnType) {
             return returnType(treeMaker().Type(returnType));
+        }
+
+        public Builder returnType(Name name) {
+            return returnType(IdentNode.of(context, name));
         }
 
         public Builder genericParam(JCTree.JCTypeParameter genericParam) {

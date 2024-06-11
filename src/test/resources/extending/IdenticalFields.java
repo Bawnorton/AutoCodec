@@ -1,17 +1,14 @@
+package extending;
+
 import com.bawnorton.autocodec.AutoCodec;
 
 @AutoCodec
-public class IdenticalFields extends Parent {
+public class IdenticalFields extends IdenticalFieldsParent {
     private String string;
     private Integer integer;
 }
 
-class Parent {
+class IdenticalFieldsParent {
     private String string;
     private Integer integer;
-
-    public Parent(String string, Integer integer) {
-        this.string = string;
-        this.integer = integer;
-    }
 }

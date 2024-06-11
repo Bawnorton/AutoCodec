@@ -7,11 +7,11 @@ import static com.google.testing.compile.CompilationSubject.assertThat;
 
 public class BasicTests extends AutoCodecTestBase {
     private void basicClassTest(String resourceName) {
-        basicTest("basic/class/%s".formatted(resourceName), resourceName);
+        basicTest("basic/classes/%s".formatted(resourceName));
     }
 
     private void basicRecordTest(String resourceName) {
-        basicTest("basic/record/%s".formatted(resourceName), resourceName);
+        basicTest("basic/records/%s".formatted(resourceName));
     }
 
     @Test
@@ -26,7 +26,7 @@ public class BasicTests extends AutoCodecTestBase {
 
     @Test
     public void testEmpty() {
-        assert compileAndRead("basic/class/Empty", "Empty")
+        assert compileAndRead("basic/classes/Empty")
                 .fields.stream().noneMatch(fieldNode -> fieldNode.name.equals("CODEC"));
     }
 
@@ -47,7 +47,7 @@ public class BasicTests extends AutoCodecTestBase {
 
     @Test
     public void testTooManyFields() {
-        Compilation compilation = compile("basic/class/TooManyFields");
+        Compilation compilation = compile("basic/classes/TooManyFields");
         assertThat(compilation).failed();
     }
 
@@ -63,7 +63,7 @@ public class BasicTests extends AutoCodecTestBase {
 
     @Test
     public void testEmptyRecord() {
-        assert compileAndRead("basic/record/Empty", "Empty")
+        assert compileAndRead("basic/records/Empty")
                 .fields.stream().noneMatch(fieldNode -> fieldNode.name.equals("CODEC"));
     }
 

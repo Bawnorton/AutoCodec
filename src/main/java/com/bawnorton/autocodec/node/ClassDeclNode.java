@@ -1,9 +1,7 @@
 package com.bawnorton.autocodec.node;
 
-import com.bawnorton.autocodec.creator.ClassConstructorCreator;
-import com.bawnorton.autocodec.creator.ConstructorCreator;
-import com.bawnorton.autocodec.creator.RecordConstructorCreator;
-import com.bawnorton.autocodec.node.finder.MethodFinder;
+import com.bawnorton.autocodec.node.container.FieldContainer;
+import com.bawnorton.autocodec.node.container.MethodContainer;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
@@ -11,7 +9,7 @@ import com.sun.tools.javac.util.List;
 import java.lang.annotation.Annotation;
 
 // Class, Enum, Interface, Record, Annotation
-public final class ClassDeclNode extends StatementNode implements MethodFinder {
+public final class ClassDeclNode extends StatementNode implements MethodContainer, FieldContainer {
     private final JCTree.JCClassDecl classDecl;
     private final Tree.Kind kind;
 
@@ -84,22 +82,8 @@ public final class ClassDeclNode extends StatementNode implements MethodFinder {
         return null;
     }
 
-    public ConstructorCreator getConstructorCreator() {
-        if (isRecord()) {
-            return new RecordConstructorCreator(this);
-        } else if (isClass()) {
-            return new ClassConstructorCreator(this);
-        }
-        throw new IllegalStateException("Cannot create constructor for non-record or non-class");
-    }
-
     public boolean annotationPresent(Class<? extends Annotation> annotation) {
         return annotations.stream().anyMatch(annotationNode -> annotationNode.isOfType(annotation));
-    }
-
-    public void addField(VariableDeclNode field) {
-        fields = fields.append(field);
-        classDecl.defs = classDecl.defs.prepend(field.getTree());
     }
 
     public void addMethod(MethodDeclNode method) {
@@ -107,7 +91,10 @@ public final class ClassDeclNode extends StatementNode implements MethodFinder {
         classDecl.defs = classDecl.defs.append(method.getTree());
     }
 
-    public void addImport() {}
+    public void addField(VariableDeclNode field) {
+        fields = fields.prepend(field);
+        classDecl.defs = classDecl.defs.prepend(field.getTree());
+    }
 
     public boolean isRecord() {
         return kind == Tree.Kind.RECORD;

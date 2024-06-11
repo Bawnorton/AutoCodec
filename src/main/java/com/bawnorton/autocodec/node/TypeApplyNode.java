@@ -1,7 +1,7 @@
 package com.bawnorton.autocodec.node;
 
-import com.bawnorton.autocodec.util.ContextHolder;
-import com.bawnorton.autocodec.util.ProcessingContext;
+import com.bawnorton.autocodec.context.ContextHolder;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
@@ -22,8 +22,8 @@ public final class TypeApplyNode extends ExpressionNode {
     }
 
     public static class Builder extends ContextHolder {
+        private List<JCTree.JCExpression> typeArgs = List.nil();
         private JCTree.JCExpression clazz;
-        private List<JCTree.JCExpression> typeArgs;
 
         private Builder(ProcessingContext context) {
             super(context);
@@ -38,16 +38,16 @@ public final class TypeApplyNode extends ExpressionNode {
             return clazz(clazz.getTree());
         }
 
+        public Builder clazz(Name clazz) {
+            return clazz(context.treeMaker().Ident(clazz));
+        }
+
         public Builder clazz(String clazz) {
-            return clazz(context.treeMaker().Ident(context.names().fromString(clazz)));
+            return clazz(names().fromString(clazz));
         }
 
         public Builder typeArg(JCTree.JCExpression typeArg) {
-            if (typeArgs == null) {
-                typeArgs = List.of(typeArg);
-            } else {
-                typeArgs = typeArgs.append(typeArg);
-            }
+            typeArgs = typeArgs.append(typeArg);
             return this;
         }
 

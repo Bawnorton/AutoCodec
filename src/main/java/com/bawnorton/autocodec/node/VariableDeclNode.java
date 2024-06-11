@@ -1,7 +1,7 @@
 package com.bawnorton.autocodec.node;
 
-import com.bawnorton.autocodec.util.ContextHolder;
-import com.bawnorton.autocodec.util.ProcessingContext;
+import com.bawnorton.autocodec.context.ContextHolder;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
@@ -35,12 +35,35 @@ public final class VariableDeclNode extends StatementNode {
         return variableDecl.name.toString();
     }
 
+    /**
+     * @return {@code FieldType}
+     */
     public Type getType() {
         return variableDecl.vartype.type;
     }
 
-    public JCTree.JCExpression getVarType() {
+    /**
+     * @return {@code FieldType<Generics>}
+     */
+    public JCTree.JCExpression getVartype() {
         return variableDecl.vartype;
+    }
+
+    /**
+     * @return {@code [Generics]}
+     */
+    public List<Type> getGenericTypes() {
+        if(variableDecl.vartype.type instanceof Type.ClassType classType) {
+            return classType.typarams_field;
+        }
+        return List.nil();
+    }
+
+    /**
+     * @return {@code "FieldType"}
+     */
+    public Name getSimpleTypeName() {
+        return variableDecl.vartype.type.tsym.name;
     }
 
     public Type.ClassType getBoxedType(Types types) {
@@ -161,6 +184,11 @@ public final class VariableDeclNode extends StatementNode {
 
         public Builder genericParam(ClassDeclNode genericParam) {
             return genericParam(genericParam.getTree());
+        }
+
+        public Builder genericParams(List<Type> genericParams) {
+            this.genericParams = genericParams;
+            return this;
         }
 
         public Builder name(Name name) {

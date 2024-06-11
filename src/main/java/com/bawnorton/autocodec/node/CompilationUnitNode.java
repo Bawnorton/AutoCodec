@@ -1,15 +1,14 @@
 package com.bawnorton.autocodec.node;
 
-import com.bawnorton.autocodec.node.finder.ImportFinder;
-import com.sun.source.tree.Tree;
+import com.bawnorton.autocodec.node.container.ImportContainer;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
 // File
-public final class CompilationUnitNode extends TreeNode implements ImportFinder {
+public final class CompilationUnitNode extends TreeNode implements ImportContainer {
     private final JCTree.JCCompilationUnit compilationUnit;
+    private final List<ClassDeclNode> classes;
     private List<ImportNode> imports;
-    private List<ClassDeclNode> classes;
     private int importIndex;
 
     public CompilationUnitNode(JCTree.JCCompilationUnit compilationUnit) {

@@ -1,3 +1,5 @@
+package optional;
+
 import com.bawnorton.autocodec.AutoCodec;
 import com.bawnorton.autocodec.OptionalEntry;
 

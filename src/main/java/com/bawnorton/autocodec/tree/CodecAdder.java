@@ -2,27 +2,24 @@ package com.bawnorton.autocodec.tree;
 
 import com.bawnorton.autocodec.AutoCodec;
 import com.bawnorton.autocodec.Ignore;
-import com.bawnorton.autocodec.OptionalEntry;
-import com.bawnorton.autocodec.creator.CodecReferenceCreator;
-import com.bawnorton.autocodec.codec.CodecReference;
+import com.bawnorton.autocodec.codec.entry.CodecEntry;
+import com.bawnorton.autocodec.codec.entry.CodecEntryField;
+import com.bawnorton.autocodec.codec.clazz.CodecableClass;
+import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.codec.entry.factory.CodecEntryFactory;
+import com.bawnorton.autocodec.codec.clazz.factory.CtorFactory;
 import com.bawnorton.autocodec.node.*;
-import com.bawnorton.autocodec.creator.ConstructorCreator;
-import com.bawnorton.autocodec.util.IncludedField;
-import com.bawnorton.autocodec.util.ProcessingContext;
 import com.sun.source.tree.MemberReferenceTree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
-import java.util.ArrayList;
-import java.util.List;
+import com.sun.tools.javac.util.List;
 
 public class CodecAdder extends NodeVisitor {
     private static final int MAX_FIELDS = 16;
-    private static final List<String> NEEDED_IMPORTS = new ArrayList<>();
-
-    static {
-        NEEDED_IMPORTS.add("com.mojang.serialization.Codec");
-        NEEDED_IMPORTS.add("com.mojang.serialization.codecs.RecordCodecBuilder");
-    }
+    private static final List<String> NEEDED_IMPORTS = List.of(
+            "com.mojang.serialization.Codec",
+            "com.mojang.serialization.codecs.RecordCodecBuilder"
+    );
 
     private final String codecFieldName;
 
@@ -35,38 +32,45 @@ public class CodecAdder extends NodeVisitor {
     public void visitClassDeclNode(ClassDeclNode classDeclNode) {
         if(cantAddCodecField(classDeclNode)) return;
 
-        LambdaNode codecCreatorNode = createCodecLambda(classDeclNode);
-        classDeclNode.addField(createCodecField(classDeclNode, codecCreatorNode));
+        CodecableClass codecableClass = new CodecableClass(holder.getContext(), classDeclNode);
+        LambdaNode codecCreatorNode = createCodecBody(codecableClass);
+        codecableClass.addField(createCodecField(codecableClass, codecCreatorNode));
     }
 
     @Override
     protected void visitCompilationUnitNode(CompilationUnitNode compilationUnitNode) {
-        for (String importPath : NEEDED_IMPORTS) {
-            createImportIfMissing(compilationUnitNode, importPath);
-        }
+        boolean autoCodecPresent = false;
+        boolean optionalPresent = false;
+
         for (ClassDeclNode classDeclNode : compilationUnitNode.getClasses()) {
             if (!classDeclNode.annotationPresent(AutoCodec.class)) continue;
 
-            List<IncludedField> includedFields = getIncludedFields(classDeclNode);
-            if (includedFields.stream().anyMatch(IncludedField::isOptional)) {
-                createImportIfMissing(compilationUnitNode, "java.util.Optional");
+            autoCodecPresent = true;
+            List<CodecEntryField> codecEntryFields = new CodecableClass(holder.getContext(), classDeclNode).getEntryFields();
+            if (codecEntryFields.stream().anyMatch(CodecEntryField::isOptional)) {
+                optionalPresent = true;
             }
         }
+        if (!autoCodecPresent) return;
+
+        for (String importPath : NEEDED_IMPORTS) {
+            createImportIfMissing(compilationUnitNode, importPath);
+        }
+        if (!optionalPresent) return;
+
+        createImportIfMissing(compilationUnitNode, "java.util.Optional");
     }
 
     private void createImportIfMissing(CompilationUnitNode compilationUnitNode, String importPath) {
         ImportNode importNode = compilationUnitNode.findImport(importPath);
         if(importNode == null) {
-            ImportNode newImport = createImport(importPath);
-            compilationUnitNode.addImport(newImport);
+            compilationUnitNode.addImport(
+                    ImportNode.builder(holder.getContext())
+                            .importPath(importPath)
+                            .isStatic(false)
+                            .build()
+            );
         }
-    }
-
-    private ImportNode createImport(String importPath) {
-        return ImportNode.builder(holder.getContext())
-                .importPath(importPath)
-                .isStatic(false)
-                .build();
     }
 
     private boolean cantAddCodecField(ClassDeclNode classDeclNode) {
@@ -96,18 +100,18 @@ public class CodecAdder extends NodeVisitor {
         return false;
     }
 
-    private LambdaNode createCodecLambda(ClassDeclNode classDeclNode) {
-        List<IncludedField> includedFields = getIncludedFields(classDeclNode);
-        createConstructorIfMissing(classDeclNode, includedFields);
+    private LambdaNode createCodecBody(CodecableClass codecableClass) {
+        List<CodecEntryField> codecEntryFields = codecableClass.getEntryFields();
+        createConstructorIfMissing(codecableClass, codecEntryFields);
 
-        List<CodecReference> includedCodecs = new ArrayList<>();
-        for (IncludedField includedField : includedFields) {
-            if(!classDeclNode.isRecord()) {
-                createGetterIfMissing(classDeclNode, includedField);
+        List<CodecEntry> includedCodecs = List.nil();
+        for (CodecEntryField codecEntryField : codecEntryFields) {
+            if(!codecableClass.node().isRecord()) {
+                createGetterIfMissing(codecableClass, codecEntryField);
             }
 
-            CodecReferenceCreator creator = new CodecReferenceCreator(holder.getContext(), classDeclNode, includedField);
-            includedCodecs.add(creator.createReference());
+            CodecEntryFactory codecEntryFactory = codecEntryField.getFactory(holder.getContext());
+            includedCodecs = includedCodecs.append(codecEntryFactory.createEntry());
         }
 
         FieldAccessNode instanceGroupReferenceNode = FieldAccessNode.builder(holder.getContext())
@@ -117,8 +121,8 @@ public class CodecAdder extends NodeVisitor {
 
         MethodInvocationNode.Builder instanceGroupInvocationNodeBuilder = MethodInvocationNode.builder(holder.getContext())
                 .methodSelect(instanceGroupReferenceNode);
-        for (CodecReference reference : includedCodecs) {
-            instanceGroupInvocationNodeBuilder.argument(reference.codecNode());
+        for (CodecEntry entry : includedCodecs) {
+            instanceGroupInvocationNodeBuilder.argument(entry.codecNode());
         }
         MethodInvocationNode instanceGroupInvocationNode = instanceGroupInvocationNodeBuilder.build();
 
@@ -130,7 +134,7 @@ public class CodecAdder extends NodeVisitor {
         MemberReferenceNode selfConstructorReferenceNode = MemberReferenceNode.builder(holder.getContext())
                 .mode(MemberReferenceTree.ReferenceMode.NEW)
                 .name("<init>")
-                .expression(classDeclNode.getName())
+                .expression(codecableClass.name())
                 .build();
 
         VariableDeclNode instanceParameterNode = VariableDeclNode.builder(holder.getContext())
@@ -138,13 +142,13 @@ public class CodecAdder extends NodeVisitor {
                 .name("instance")
                 .enclosingType("RecordCodecBuilder")
                 .type("Instance")
-                .genericParam(classDeclNode)
+                .genericParam(codecableClass.node())
                 .noSym()
                 .build();
 
         MethodInvocationNode applyInvocationNode = MethodInvocationNode.builder(holder.getContext())
                 .methodSelect(applyReferenceNode)
-                .typeArgument(classDeclNode)
+                .typeArgument(codecableClass.node())
                 .argument("instance")
                 .argument(selfConstructorReferenceNode)
                 .build();
@@ -155,7 +159,7 @@ public class CodecAdder extends NodeVisitor {
                 .build();
     }
 
-    private VariableDeclNode createCodecField(ClassDeclNode classDeclNode, LambdaNode codecCreatorNode) {
+    private VariableDeclNode createCodecField(CodecableClass codecableClass, LambdaNode codecCreatorNode) {
         FieldAccessNode recordCodecBuilderCreateReferenceNode = FieldAccessNode.builder(holder.getContext())
                 .selected("RecordCodecBuilder")
                 .name("create")
@@ -163,39 +167,35 @@ public class CodecAdder extends NodeVisitor {
 
         MethodInvocationNode recordCodecBuilderCreateInvocationNode = MethodInvocationNode.builder(holder.getContext())
                 .methodSelect(recordCodecBuilderCreateReferenceNode)
-                .typeArgument(classDeclNode)
+                .typeArgument(codecableClass.node())
                 .argument(codecCreatorNode)
                 .build();
 
         return VariableDeclNode.builder(holder.getContext())
                 .modifiers(Flags.PUBLIC | Flags.STATIC | Flags.FINAL)
                 .name(codecFieldName)
-                .owner(classDeclNode)
+                .owner(codecableClass.node())
                 .module("com.mojang.serialization")
                 .type("Codec")
-                .genericParam(classDeclNode)
+                .genericParam(codecableClass.node())
                 .initialValue(recordCodecBuilderCreateInvocationNode)
                 .build();
     }
 
-    private void createConstructorIfMissing(ClassDeclNode classDeclNode, List<IncludedField> includedFields) {
-        List<Type> parameterTypes = new ArrayList<>();
-        for (IncludedField includedField : includedFields) {
-            parameterTypes.add(includedField.fieldNode().getType());
-        }
-
-        MethodDeclNode constructor = classDeclNode.findConstructor(parameterTypes);
+    private void createConstructorIfMissing(CodecableClass codecableClass, List<CodecEntryField> codecEntryFields) {
+        List<Type> parameterTypes = codecEntryFields.map(CodecEntryField::getParameterType);
+        MethodDeclNode constructor = codecableClass.findConstructor(parameterTypes);
         if(constructor == null) {
-            ConstructorCreator ctorCreator = classDeclNode.getConstructorCreator();
-            ctorCreator.createCtorForFields(holder.getContext(), includedFields);
+            CtorFactory ctorFactory = codecableClass.getCtorFactory(holder.getContext());
+            codecableClass.addMethod(ctorFactory.createCtorForFields(codecEntryFields));
         }
     }
 
-    private void createGetterIfMissing(ClassDeclNode classDeclNode, IncludedField includedField) {
-        VariableDeclNode fieldNode = includedField.fieldNode();
-        MethodDeclNode fieldGetter = classDeclNode.findMethod(fieldNode.getName(), fieldNode.getType());
+    private void createGetterIfMissing(CodecableClass codecableClass, CodecEntryField codecEntryField) {
+        VariableDeclNode fieldNode = codecEntryField.node();
+        MethodDeclNode fieldGetter = codecableClass.findMethod(fieldNode.getName(), fieldNode.getType());
         if(fieldGetter == null) {
-            VariableDeclNode field = includedField.fieldNode();
+            VariableDeclNode field = codecEntryField.node();
 
             ReturnNode returnFieldNode = ReturnNode.builder(holder.getContext())
                     .expression(IdentNode.of(holder.getContext(), field.getName()))
@@ -208,25 +208,11 @@ public class CodecAdder extends NodeVisitor {
             MethodDeclNode getter = MethodDeclNode.builder(holder.getContext())
                     .modifiers(Flags.PRIVATE)
                     .name(field.getName())
-                    .returnType(field.getVarType())
+                    .returnType(field.getVartype())
                     .body(fieldReturnBlock)
                     .build();
 
-            classDeclNode.addMethod(getter);
+            codecableClass.addMethod(getter);
         }
-    }
-
-    private List<IncludedField> getIncludedFields(ClassDeclNode classDeclNode) {
-        List<VariableDeclNode> fields = classDeclNode.getFields();
-        List<IncludedField> included = new ArrayList<>();
-
-        for (VariableDeclNode field : fields) {
-            if (field.isStatic()) continue;
-            if (field.annotationPresent(Ignore.class)) continue;
-
-            included.add(new IncludedField(field, field.getAnnotation(OptionalEntry.class)));
-        }
-
-        return included;
     }
 }

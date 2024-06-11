@@ -1,5 +1,6 @@
 package com.bawnorton.autocodec.node;
 
+import com.bawnorton.autocodec.node.parser.ExpressionParser;
 import com.sun.tools.javac.tree.JCTree;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -13,12 +14,11 @@ public final class AnnotationNode extends ExpressionNode {
         this.annotation = annotation;
         this.args = new HashMap<>();
 
-        ExpressionNode valueValue = null;
         for (JCTree.JCExpression arg : annotation.args) {
             if (!(arg instanceof JCTree.JCAssign assign)) continue;
             if (!(assign.lhs instanceof JCTree.JCIdent ident)) continue;
             JCTree.JCExpression value = assign.rhs;
-            args.put(ident.name.toString(), asExpressionNode(value));
+            args.put(ident.name.toString(), ExpressionParser.asExpressionNode(value));
         }
     }
 
@@ -43,7 +43,7 @@ public final class AnnotationNode extends ExpressionNode {
         return type.cast(args.get(name));
     }
 
-    public <T extends ExpressionNode> T value(Class<T> type) {
+    public <T extends ExpressionNode> T getValue(Class<T> type) {
         return getArg("value", type);
     }
 

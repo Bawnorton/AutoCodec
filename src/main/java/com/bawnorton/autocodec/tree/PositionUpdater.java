@@ -1,13 +1,16 @@
 package com.bawnorton.autocodec.tree;
 
-import com.bawnorton.autocodec.util.ContextHolder;
-import com.bawnorton.autocodec.util.ProcessingContext;
+import com.bawnorton.autocodec.context.ContextHolder;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.parser.JavacParser;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
-import java.util.List;
+import com.sun.tools.javac.util.List;
 
+/**
+ * Recompiles a modified compilation unit to update the positions of the nodes.
+ */
 public final class PositionUpdater extends TreeScanner {
     private final ContextHolder holder;
 

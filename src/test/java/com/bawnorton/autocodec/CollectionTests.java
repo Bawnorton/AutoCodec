@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 public class CollectionTests extends AutoCodecTestBase {
     private void collectionTest(String resourceName) {
-        basicTest("collection/%s".formatted(resourceName), resourceName);
+        basicTest("collection/%s".formatted(resourceName));
     }
 
     @Test
@@ -14,6 +14,11 @@ public class CollectionTests extends AutoCodecTestBase {
 
     @Test
     public void testListChild() {
-        collectionTest("ListChild");
+        collectionTest("ListTypes");
+    }
+
+    @Test
+    public void testSingleMap() {
+        collectionTest("SingleMap");
     }
 }

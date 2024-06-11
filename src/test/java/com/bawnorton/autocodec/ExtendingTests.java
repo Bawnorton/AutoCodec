@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 public class ExtendingTests extends AutoCodecTestBase {
     private void extendingTest(String resourceName) {
-        basicTest("extending/%s".formatted(resourceName), resourceName);
+        basicTest("extending/%s".formatted(resourceName));
     }
 
     @Test

@@ -1,28 +1,26 @@
-package com.bawnorton.autocodec.codec.entry.factory;
+package com.bawnorton.autocodec.codec.adapter.entry;
 
 import com.bawnorton.autocodec.codec.entry.CodecEntry;
-import com.bawnorton.autocodec.node.*;
 import com.bawnorton.autocodec.context.ContextHolder;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.node.ClassDeclNode;
+import com.bawnorton.autocodec.node.FieldAccessNode;
+import com.bawnorton.autocodec.node.MemberReferenceNode;
+import com.bawnorton.autocodec.node.MethodInvocationNode;
+import com.bawnorton.autocodec.node.VariableDeclNode;
 import com.sun.source.tree.MemberReferenceTree;
 
-public abstract class CodecEntryFactory extends ContextHolder {
-    protected final ClassDeclNode enclosingClass;
-    protected final VariableDeclNode fieldNode;
-
-    public CodecEntryFactory(ProcessingContext context, ClassDeclNode enclosingClass, VariableDeclNode fieldNode) {
+public abstract class EntryAdapter extends ContextHolder {
+    public EntryAdapter(ProcessingContext context) {
         super(context);
-        this.enclosingClass = enclosingClass;
-        this.fieldNode = fieldNode;
     }
 
-    public abstract CodecEntry createEntry();
+    public abstract CodecEntry createEntry(ClassDeclNode enclosingClass, VariableDeclNode field);
 
     /**
      * {@code [CodecDefintion].forGetter(Class::fieldName)}
-     * @param supplier {@code [CodecDefinition]}
      */
-    protected MethodInvocationNode getterInvocation(MethodInvocationNode supplier) {
+    protected MethodInvocationNode getterInvocation(MethodInvocationNode supplier, ClassDeclNode enclosingClass, VariableDeclNode field) {
         FieldAccessNode forGetterReference = FieldAccessNode.builder(context)
                 .selected(supplier)
                 .name("forGetter")
@@ -30,7 +28,7 @@ public abstract class CodecEntryFactory extends ContextHolder {
 
         MemberReferenceNode selfFieldReference = MemberReferenceNode.builder(context)
                 .mode(MemberReferenceTree.ReferenceMode.INVOKE)
-                .name(fieldNode.getName())
+                .name(field.getName())
                 .expression(enclosingClass.getName())
                 .build();
 

@@ -13,8 +13,13 @@ public class CollectionTests extends AutoCodecTestBase {
     }
 
     @Test
-    public void testListChild() {
+    public void testListTypes() {
         collectionTest("ListTypes");
+    }
+
+    @Test
+    public void testOptionalList() {
+        collectionTest("OptionalLists");
     }
 
     @Test

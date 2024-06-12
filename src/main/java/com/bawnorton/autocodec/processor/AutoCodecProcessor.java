@@ -1,12 +1,20 @@
 package com.bawnorton.autocodec.processor;
 
 import com.bawnorton.autocodec.AutoCodec;
+import com.bawnorton.autocodec.codec.adapter.Adapters;
+import com.bawnorton.autocodec.codec.adapter.entry.*;
+import com.bawnorton.autocodec.codec.adapter.field.FieldAdapterFactory;
+import com.bawnorton.autocodec.codec.adapter.field.ListFieldAdpater;
+import com.bawnorton.autocodec.codec.adapter.field.MapFieldAdpater;
+import com.bawnorton.autocodec.codec.adapter.field.NormalFieldAdpater;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.bawnorton.autocodec.tree.CodecAdder;
 import com.bawnorton.autocodec.tree.PositionUpdater;
-import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.util.TypeUtils;
 import com.google.auto.service.AutoService;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symtab;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
 import com.sun.tools.javac.comp.Enter;
 import com.sun.tools.javac.parser.ParserFactory;
@@ -24,7 +32,10 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @SupportedAnnotationTypes("com.bawnorton.autocodec.AutoCodec")
@@ -45,8 +56,15 @@ public class AutoCodecProcessor extends AbstractProcessor {
         ParserFactory parserFactory = ParserFactory.instance(context);
         Enter enter = Enter.instance(context);
         JavacTrees trees = JavacTrees.instance(processingEnv);
+        Elements elements = processingEnv.getElementUtils();
 
-        this.processingContext = new ProcessingContext(treeMaker, names, symtab, types, parserFactory, enter, trees, processingEnv.getMessager());
+        this.processingContext = new ProcessingContext(
+                treeMaker, names, symtab, types, parserFactory,
+                enter, trees, elements, processingEnv.getMessager(),
+                new Adapters<>(), new Adapters<>(), new Adapters<>()
+        );
+
+        initAdapters();
     }
 
     @Override
@@ -66,5 +84,25 @@ public class AutoCodecProcessor extends AbstractProcessor {
             }
         }
         return true;
+    }
+
+    private void initAdapters() {
+        Type listType = TypeUtils.typeOf(processingContext, List.class);
+        Type mapType = TypeUtils.typeOf(processingContext, Map.class);
+
+        Adapters<RequiredEntryAdapterFactory> requiredEntryAdapters = processingContext.requiredEntryAdapters();
+        requiredEntryAdapters.setDefaultAdapterFactory(RequiredNormalEntryAdapter::new);
+        requiredEntryAdapters.registerAdapterFactory(listType, RequiredListEntryAdapter::new);
+        requiredEntryAdapters.registerAdapterFactory(mapType, RequiredMapEntryAdapter::new);
+
+        Adapters<OptionalEntryAdapterFactory> optionalEntryAdapters = processingContext.optionalEntryAdapters();
+        optionalEntryAdapters.setDefaultAdapterFactory(OptionalNormalEntryAdapter::new);
+        optionalEntryAdapters.registerAdapterFactory(listType, OptionalListEntryAdapter::new);
+        optionalEntryAdapters.registerAdapterFactory(mapType, OptionalMapEntryAdapter::new);
+
+        Adapters<FieldAdapterFactory> fieldAdapters = processingContext.fieldAdapters();
+        fieldAdapters.setDefaultAdapterFactory(NormalFieldAdpater::new);
+        fieldAdapters.registerAdapterFactory(listType, ListFieldAdpater::new);
+        fieldAdapters.registerAdapterFactory(mapType, MapFieldAdpater::new);
     }
 }

@@ -53,6 +53,10 @@ public final class VariableDeclNode extends StatementNode {
      * @return {@code [Generics]}
      */
     public List<Type> getGenericTypes() {
+        if (!canHaveGenerics()) {
+            return null;
+        }
+
         if(variableDecl.vartype.type instanceof Type.ClassType classType) {
             return classType.typarams_field;
         }
@@ -72,6 +76,14 @@ public final class VariableDeclNode extends StatementNode {
 
     public boolean isStatic() {
         return variableDecl.mods.getFlags().contains(Modifier.STATIC);
+    }
+
+    public boolean isPrimitive() {
+        return variableDecl.vartype.type.isPrimitive();
+    }
+
+    public boolean canHaveGenerics() {
+        return variableDecl.vartype instanceof JCTree.JCTypeApply;
     }
 
     public boolean annotationPresent(Class<? extends Annotation> annotation) {
@@ -114,16 +126,10 @@ public final class VariableDeclNode extends StatementNode {
         private JCTree.JCExpression primitiveType;
         private Name typeName;
         private Name enclosingTypeName;
-        private List<Type> genericParams = null;
-        private boolean implicitType;
+        private List<JCTree.JCExpression> genericParams = null;
 
         private long flags;
         private Name name;
-        private Name module;
-
-        private boolean noSym;
-        private Symbol.ClassSymbol ownerSym;
-
         private JCTree.JCExpression initializer;
 
         private Builder(ProcessingContext context) {
@@ -165,17 +171,20 @@ public final class VariableDeclNode extends StatementNode {
             return enclosingType(names().fromString(enclosingTypeName));
         }
 
-        public Builder implicitType() {
-            this.implicitType = true;
-            return this;
-        }
-
-        public Builder genericParam(Type genericParam) {
+        public Builder genericParam(JCTree.JCExpression genericParam) {
             if (genericParams == null) {
                 genericParams = List.nil();
             }
             genericParams = genericParams.append(genericParam);
             return this;
+        }
+
+        public Builder genericParam(ExpressionNode genericParam) {
+            return genericParam(genericParam.getTree());
+        }
+
+        public Builder genericParam(Type genericParam) {
+            return genericParam(IdentNode.of(context, genericParam.tsym.name));
         }
 
         public Builder genericParam(JCTree.JCClassDecl genericParam) {
@@ -187,7 +196,11 @@ public final class VariableDeclNode extends StatementNode {
         }
 
         public Builder genericParams(List<Type> genericParams) {
-            this.genericParams = genericParams;
+            if (genericParams == null) {
+                return this;
+            }
+
+            this.genericParams = genericParams.map(type -> IdentNode.of(context, type.tsym.name).getTree());
             return this;
         }
 
@@ -198,29 +211,6 @@ public final class VariableDeclNode extends StatementNode {
 
         public Builder name(String name) {
             return name(names().fromString(name));
-        }
-
-        public Builder module(Name module) {
-            this.module = module;
-            return this;
-        }
-
-        public Builder module(String module) {
-            return module(names().fromString(module));
-        }
-
-        public Builder noSym() {
-            this.noSym = true;
-            return this;
-        }
-
-        public Builder owner(JCTree.JCClassDecl owner) {
-            ownerSym = owner.sym;
-            return this;
-        }
-
-        public Builder owner(ClassDeclNode owner) {
-            return owner(owner.getTree());
         }
 
         public Builder modifiers(long flags) {
@@ -241,18 +231,11 @@ public final class VariableDeclNode extends StatementNode {
             if (name == null) throw new IllegalStateException("Name must be set");
 
             JCTree.JCExpression type;
-            Symbol.VarSymbol sym = null;
-            if (implicitType) {
-                type = null;
-            } else if (primitiveType != null) {
+            if (primitiveType != null) {
                 type = primitiveType;
             } else if (genericParams == null && typeName != null) {
                 type = treeMaker().Ident(typeName);
             } else if (typeName != null) {
-                List<JCTree.JCExpression> genericArgs = List.nil();
-                for (Type genericType : genericParams) {
-                    genericArgs = genericArgs.append(treeMaker().Ident(genericType.tsym));
-                }
                 JCTree.JCIdent typeIdent = treeMaker().Ident(typeName);
                 if (enclosingTypeName != null) {
                     JCTree.JCIdent enclosingTypeIdent = treeMaker().Ident(enclosingTypeName);
@@ -262,67 +245,16 @@ public final class VariableDeclNode extends StatementNode {
                                     .name(typeName)
                                     .build()
                                     .getTree(),
-                            genericArgs
+                            genericParams
                     );
                 } else {
-                    type = treeMaker().TypeApply(typeIdent, genericArgs);
-                }
-
-                if (!noSym) {
-                    if (module == null) {
-                        throw new IllegalStateException("Module must be set or noSym must be true");
-                    }
-                    if (ownerSym == null) {
-                        throw new IllegalStateException("Owner must be set or noSym must be true");
-                    }
-
-                    Name className = module;
-                    if (enclosingTypeName != null) {
-                        className = className
-                                .append(names().fromString("."))
-                                .append(enclosingTypeName);
-                    }
-                    className = className
-                            .append(names().fromString("."))
-                            .append(typeName);
-                    Symbol.ModuleSymbol moduleSymbol = symtab().enterModule(module);
-                    Symbol.ClassSymbol classSymbol = symtab().enterClass(moduleSymbol, className);
-                    List<Type> typeArgs = List.nil();
-                    for (Type genericType : genericParams) {
-                        typeArgs = typeArgs.append(genericType);
-                    }
-
-                    Type enclosingType;
-                    if (enclosingTypeName != null) {
-                        enclosingType = symtab().enterClass(moduleSymbol, module.append(names().fromString(".")).append(enclosingTypeName)).type;
-                    } else {
-                        enclosingType = Type.noType;
-                    }
-                    Type.ClassType classType = new Type.ClassType(
-                            enclosingType,
-                            typeArgs,
-                            classSymbol
-                    );
-                    type.type = classType;
-                    JCTree.JCTypeApply applyType = (JCTree.JCTypeApply) type;
-                    JCTree.JCExpression clazzType = applyType.clazz;
-                    if(clazzType instanceof JCTree.JCIdent ident) {
-                        ident.sym = classSymbol;
-                    } else if(clazzType instanceof JCTree.JCFieldAccess fieldAccess) {
-                        fieldAccess.sym = classSymbol;
-                    }
-                    applyType.clazz.type = new Type.ClassType(Type.noType, List.nil(), classSymbol);
-
-                    sym = new Symbol.VarSymbol(flags, name, classType, ownerSym);
+                    type = treeMaker().TypeApply(typeIdent, genericParams);
                 }
             } else {
                 throw new IllegalStateException("Type must be set");
             }
 
             JCTree.JCVariableDecl varDecl = treeMaker().VarDef(treeMaker().Modifiers(flags), name, type, initializer);
-            if (sym != null) {
-                varDecl.sym = sym;
-            }
             return new VariableDeclNode(varDecl);
         }
     }

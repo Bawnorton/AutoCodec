@@ -4,6 +4,7 @@ import com.bawnorton.autocodec.context.ContextHolder;
 import com.bawnorton.autocodec.context.ProcessingContext;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.Name;
 
 public final class NewClassNode extends ExpressionNode {
     private final JCTree.JCNewClass newClass;
@@ -65,6 +66,14 @@ public final class NewClassNode extends ExpressionNode {
 
         public Builder arg(ExpressionNode arg) {
             return arg(arg.getTree());
+        }
+
+        public Builder arg(Name name) {
+            return arg(IdentNode.of(context, name));
+        }
+
+        public Builder arg(String arg) {
+            return arg(names().fromString(arg));
         }
 
         public Builder def(JCTree.JCClassDecl def) {

@@ -2,12 +2,12 @@ package com.bawnorton.autocodec.tree;
 
 import com.bawnorton.autocodec.AutoCodec;
 import com.bawnorton.autocodec.Ignore;
+import com.bawnorton.autocodec.codec.adapter.entry.EntryAdapter;
+import com.bawnorton.autocodec.codec.clazz.CodecableClass;
+import com.bawnorton.autocodec.codec.clazz.factory.CtorFactory;
 import com.bawnorton.autocodec.codec.entry.CodecEntry;
 import com.bawnorton.autocodec.codec.entry.CodecEntryField;
-import com.bawnorton.autocodec.codec.clazz.CodecableClass;
 import com.bawnorton.autocodec.context.ProcessingContext;
-import com.bawnorton.autocodec.codec.entry.factory.CodecEntryFactory;
-import com.bawnorton.autocodec.codec.clazz.factory.CtorFactory;
 import com.bawnorton.autocodec.node.*;
 import com.sun.source.tree.MemberReferenceTree;
 import com.sun.tools.javac.code.Flags;
@@ -106,12 +106,12 @@ public class CodecAdder extends NodeVisitor {
 
         List<CodecEntry> includedCodecs = List.nil();
         for (CodecEntryField codecEntryField : codecEntryFields) {
-            if(!codecableClass.node().isRecord()) {
+            if(!codecableClass.classDecl().isRecord()) {
                 createGetterIfMissing(codecableClass, codecEntryField);
             }
 
-            CodecEntryFactory codecEntryFactory = codecEntryField.getFactory(holder.getContext());
-            includedCodecs = includedCodecs.append(codecEntryFactory.createEntry());
+            EntryAdapter entryAdapter = codecEntryField.getAdapter();
+            includedCodecs = includedCodecs.append(entryAdapter.createEntry(codecableClass.classDecl(), codecEntryField.field()));
         }
 
         FieldAccessNode instanceGroupReferenceNode = FieldAccessNode.builder(holder.getContext())
@@ -142,13 +142,12 @@ public class CodecAdder extends NodeVisitor {
                 .name("instance")
                 .enclosingType("RecordCodecBuilder")
                 .type("Instance")
-                .genericParam(codecableClass.node())
-                .noSym()
+                .genericParam(codecableClass.classDecl())
                 .build();
 
         MethodInvocationNode applyInvocationNode = MethodInvocationNode.builder(holder.getContext())
                 .methodSelect(applyReferenceNode)
-                .typeArgument(codecableClass.node())
+                .typeArgument(codecableClass.classDecl())
                 .argument("instance")
                 .argument(selfConstructorReferenceNode)
                 .build();
@@ -167,17 +166,15 @@ public class CodecAdder extends NodeVisitor {
 
         MethodInvocationNode recordCodecBuilderCreateInvocationNode = MethodInvocationNode.builder(holder.getContext())
                 .methodSelect(recordCodecBuilderCreateReferenceNode)
-                .typeArgument(codecableClass.node())
+                .typeArgument(codecableClass.classDecl())
                 .argument(codecCreatorNode)
                 .build();
 
         return VariableDeclNode.builder(holder.getContext())
                 .modifiers(Flags.PUBLIC | Flags.STATIC | Flags.FINAL)
                 .name(codecFieldName)
-                .owner(codecableClass.node())
-                .module("com.mojang.serialization")
                 .type("Codec")
-                .genericParam(codecableClass.node())
+                .genericParam(codecableClass.classDecl())
                 .initialValue(recordCodecBuilderCreateInvocationNode)
                 .build();
     }
@@ -192,10 +189,10 @@ public class CodecAdder extends NodeVisitor {
     }
 
     private void createGetterIfMissing(CodecableClass codecableClass, CodecEntryField codecEntryField) {
-        VariableDeclNode fieldNode = codecEntryField.node();
+        VariableDeclNode fieldNode = codecEntryField.field();
         MethodDeclNode fieldGetter = codecableClass.findMethod(fieldNode.getName(), fieldNode.getType());
         if(fieldGetter == null) {
-            VariableDeclNode field = codecEntryField.node();
+            VariableDeclNode field = codecEntryField.field();
 
             ReturnNode returnFieldNode = ReturnNode.builder(holder.getContext())
                     .expression(IdentNode.of(holder.getContext(), field.getName()))

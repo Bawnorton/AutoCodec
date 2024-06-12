@@ -1,33 +1,33 @@
-package com.bawnorton.autocodec.codec.entry.factory;
+package com.bawnorton.autocodec.codec.adapter.entry;
 
 import com.bawnorton.autocodec.codec.entry.CodecEntry;
+import com.bawnorton.autocodec.context.ProcessingContext;
 import com.bawnorton.autocodec.node.ClassDeclNode;
 import com.bawnorton.autocodec.node.ExpressionNode;
 import com.bawnorton.autocodec.node.FieldAccessNode;
 import com.bawnorton.autocodec.node.LiteralNode;
 import com.bawnorton.autocodec.node.MethodInvocationNode;
 import com.bawnorton.autocodec.node.VariableDeclNode;
-import com.bawnorton.autocodec.context.ProcessingContext;
 
-public abstract class RequiredCodecEntryFactory extends CodecEntryFactory {
-    protected RequiredCodecEntryFactory(ProcessingContext context, ClassDeclNode enclosingClass, VariableDeclNode fieldNode) {
-        super(context, enclosingClass, fieldNode);
+public abstract class RequiredEntryAdapter extends EntryAdapter {
+    protected RequiredEntryAdapter(ProcessingContext context) {
+        super(context);
     }
 
     @Override
-    public CodecEntry createEntry() {
-        MethodInvocationNode requiredInvocation = requiredInvocation();
-        return new CodecEntry(fieldNode, requiredInvocation);
+    public CodecEntry createEntry(ClassDeclNode enclosingClass, VariableDeclNode field) {
+        MethodInvocationNode requiredInvocation = requiredInvocation(enclosingClass, field);
+        return new CodecEntry(field, requiredInvocation);
     }
 
-    protected abstract MethodInvocationNode requiredInvocation();
+    protected abstract MethodInvocationNode requiredInvocation(ClassDeclNode enclosingClass, VariableDeclNode field);
 
-    protected MethodInvocationNode createFieldOfInvocation(ExpressionNode codecExression) {
+    protected MethodInvocationNode createFieldOfInvocation(ExpressionNode codecExression, VariableDeclNode field) {
         FieldAccessNode fieldOfReference = createFieldOfReference(codecExression);
 
         return MethodInvocationNode.builder(context)
                 .methodSelect(fieldOfReference)
-                .argument(LiteralNode.of(context, fieldNode.getName()))
+                .argument(LiteralNode.of(context, field.getName()))
                 .build();
     }
 

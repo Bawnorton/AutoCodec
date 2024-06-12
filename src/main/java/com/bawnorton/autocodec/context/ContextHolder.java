@@ -1,12 +1,22 @@
 package com.bawnorton.autocodec.context;
 
+import com.bawnorton.autocodec.codec.adapter.Adapters;
+import com.bawnorton.autocodec.codec.adapter.entry.RequiredEntryAdapterFactory;
+import com.bawnorton.autocodec.codec.adapter.entry.OptionalEntryAdapter;
+import com.bawnorton.autocodec.codec.adapter.entry.OptionalEntryAdapterFactory;
+import com.bawnorton.autocodec.codec.adapter.entry.RequiredEntryAdapter;
+import com.bawnorton.autocodec.codec.adapter.field.FieldAdapterFactory;
+import com.bawnorton.autocodec.codec.adapter.field.FieldAdpater;
+import com.bawnorton.autocodec.node.AnnotationNode;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symtab;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
 import com.sun.tools.javac.comp.Enter;
 import com.sun.tools.javac.parser.ParserFactory;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Names;
+import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 
 public class ContextHolder {
@@ -46,6 +56,34 @@ public class ContextHolder {
 
     public JavacTrees trees() {
         return context.trees();
+    }
+
+    public Elements elements() {
+        return context.elements();
+    }
+
+    public Adapters<FieldAdapterFactory> fieldAdapters() {
+        return context.fieldAdapters();
+    }
+
+    public FieldAdpater fieldAdapter(Type fieldType) {
+        return fieldAdapters().getAdapterFactory(context, fieldType).getAdapter(context);
+    }
+
+    public Adapters<RequiredEntryAdapterFactory> requiredEntryAdapters() {
+        return context.requiredEntryAdapters();
+    }
+
+    public RequiredEntryAdapter requiredEntryAdapter(Type requiredType) {
+        return requiredEntryAdapters().getAdapterFactory(context, requiredType).getAdapter(context);
+    }
+
+    public Adapters<OptionalEntryAdapterFactory> optionalEntryAdapters() {
+        return context.optionalEntryAdapters();
+    }
+
+    public OptionalEntryAdapter optionalEntryAdapter(Type optionalType, AnnotationNode optional) {
+        return optionalEntryAdapters().getAdapterFactory(context, optionalType).getAdapter(context, optional);
     }
 
     public void printNote(String message, Object... args) {

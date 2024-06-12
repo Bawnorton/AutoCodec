@@ -1,9 +1,6 @@
 package com.bawnorton.autocodec.codec.clazz.factory;
 
-import com.bawnorton.autocodec.codec.clazz.factory.field.FieldHandler;
-import com.bawnorton.autocodec.codec.clazz.factory.field.ListFieldHandler;
-import com.bawnorton.autocodec.codec.clazz.factory.field.MapFieldHandler;
-import com.bawnorton.autocodec.codec.clazz.factory.field.NormalFieldHandler;
+import com.bawnorton.autocodec.codec.adapter.field.FieldAdpater;
 import com.bawnorton.autocodec.codec.entry.CodecEntryField;
 import com.bawnorton.autocodec.context.ProcessingContext;
 import com.bawnorton.autocodec.node.BlockNode;
@@ -13,7 +10,6 @@ import com.bawnorton.autocodec.node.LiteralNode;
 import com.bawnorton.autocodec.node.MethodDeclNode;
 import com.bawnorton.autocodec.node.MethodInvocationNode;
 import com.bawnorton.autocodec.node.VariableDeclNode;
-import com.bawnorton.autocodec.util.FieldType;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -46,7 +42,7 @@ public final class ClassCtorFactory extends CtorFactory {
             if (!(symbol instanceof Symbol.MethodSymbol methodSymbol)) continue;
             if (!methodSymbol.isConstructor()) continue;
 
-            parentCtors.add(methodSymbol);
+            parentCtors = parentCtors.append(methodSymbol);
         }
         return parentCtors;
     }
@@ -94,13 +90,9 @@ public final class ClassCtorFactory extends CtorFactory {
 
     private void addFieldsToCtorBody(List<CodecEntryField> codecEntryFields, BlockNode.Builder bodyBuilder) {
         for (CodecEntryField codecEntryField : codecEntryFields) {
-            VariableDeclNode fieldNode = codecEntryField.node();
-            FieldHandler fieldHandler = switch(FieldType.ofField(context, fieldNode)) {
-                case NORMAL -> new NormalFieldHandler(context);
-                case LIST -> new ListFieldHandler(context);
-                case MAP -> new MapFieldHandler(context);
-            };
-            bodyBuilder.statements(fieldHandler.createAssignmentStatements(fieldNode));
+            VariableDeclNode fieldNode = codecEntryField.field();
+            FieldAdpater fieldAdpater = fieldAdapter(fieldNode.getType());
+            bodyBuilder.statements(fieldAdpater.createAssignmentStatements(fieldNode));
         }
     }
 
@@ -133,7 +125,7 @@ public final class ClassCtorFactory extends CtorFactory {
      * </pre>
      * creates the invocation {@code super()} for the {@code Child} constructor.
      * If the no-arg constructor is not found, the constructor with the least number of arguments is used.
-     * @return the invocation node for the parent constructor or {@code null} if no matching constructor is found.
+     * @return the invocation field for the parent constructor or {@code null} if no matching constructor is found.
      */
     private MethodInvocationNode findMinArgParentConstructor() {
         Symbol.MethodSymbol minArgCtor = parentCtors.stream()
@@ -151,13 +143,9 @@ public final class ClassCtorFactory extends CtorFactory {
 
     public List<VariableDeclNode> fieldsToParameters(List<CodecEntryField> codecEntryFields) {
         return codecEntryFields.map(field -> {
-            VariableDeclNode fieldNode = field.node();
-            FieldHandler fieldHandler = switch(FieldType.ofField(context, fieldNode)) {
-                case NORMAL -> new NormalFieldHandler(context);
-                case LIST -> new ListFieldHandler(context);
-                case MAP -> new MapFieldHandler(context);
-            };
-            return fieldHandler.asParameter(fieldNode);
+            VariableDeclNode fieldNode = field.field();
+            FieldAdpater fieldAdpater = fieldAdapter(fieldNode.getType());
+            return fieldAdpater.getParameter(fieldNode);
         });
     }
 }

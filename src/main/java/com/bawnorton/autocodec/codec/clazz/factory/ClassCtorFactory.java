@@ -39,9 +39,18 @@ public final class ClassCtorFactory extends CtorFactory {
         }
 
         MethodInvocationNode superCall = findPartialParentCtor(parentFields);
+        if(!parentFields.isEmpty() && superCall == null) {
+            printError("Cannot pass requested \"@IncludedInChildren\" fields \"%s\" to parent \"%s\" from \"%s\" as no valid constructor exists in the parent for the child to pass the value to",
+                    parentFields,
+                    parentFields.map(field -> field.fieldInfo().getOwner().name),
+                    classDeclNode.getSimpleNameString()
+            );
+        }
+
         if(superCall != null) {
             return createPartialParentCallingCtor(superCall, codecEntryFields, ownFields);
         }
+
         superCall = findMinArgParentConstructor();
         if (superCall != null) {
             // super(args) then assign fields
@@ -165,6 +174,7 @@ public final class ClassCtorFactory extends CtorFactory {
      */
     private MethodInvocationNode findPartialParentCtor(List<CodecEntryField> parentFields) {
         for (Symbol.MethodSymbol parentCtor : parentCtors) {
+            boolean foundAny = false;
             List<Symbol.VarSymbol> parameters = parentCtor.getParameters();
             List<ExpressionNode> arguments = List.nil();
             for (Symbol.VarSymbol parameter : parameters) {
@@ -173,19 +183,24 @@ public final class ClassCtorFactory extends CtorFactory {
                     FieldInfo fieldInfo = parentField.fieldInfo();
                     if (!fieldInfo.sameNameAndType(parameter)) continue;
 
-                    arguments = arguments.append(IdentNode.of(context, parentCtor.owner.name.append(names().fromString("_")).append(fieldInfo.getName())));
+                    arguments = arguments.append(IdentNode.of(context, fieldInfo.getOwner().name.append(names().fromString("_")).append(fieldInfo.getName())));
                     found = true;
                     break;
                 }
-                if (found) continue;
+                if (found) {
+                    foundAny = true;
+                    continue;
+                }
 
                 arguments = arguments.append(LiteralNode.defaultLiteral(context, parameter.type));
             }
+            if (!foundAny) continue;
 
             return MethodInvocationNode.builder(context)
                     .methodSelect("super")
                     .arguments(arguments)
                     .build();
+
         }
         return null;
     }

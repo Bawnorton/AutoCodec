@@ -49,4 +49,9 @@ public final class CodecEntryField extends ContextHolder {
             return requiredEntryAdapter(fieldInfo.getType());
         }
     }
+
+    @Override
+    public String toString() {
+        return fieldInfo.toString();
+    }
 }

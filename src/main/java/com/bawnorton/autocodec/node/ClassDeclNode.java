@@ -6,6 +6,7 @@ import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.Name;
 import java.lang.annotation.Annotation;
 
 // Class, Enum, Interface, Record, Annotation
@@ -66,8 +67,12 @@ public final class ClassDeclNode extends StatementNode implements MethodContaine
         return constructors;
     }
 
-    public String getName() {
+    public String getSimpleNameString() {
         return classDecl.getSimpleName().toString();
+    }
+
+    public Name getSimpleName() {
+        return classDecl.getSimpleName();
     }
 
     public Type.ClassType getType() {

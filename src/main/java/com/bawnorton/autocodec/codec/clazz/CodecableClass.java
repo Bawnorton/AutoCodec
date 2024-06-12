@@ -55,7 +55,7 @@ public final class CodecableClass extends ContextHolder implements MethodContain
     }
 
     public String name() {
-        return classDecl.getName();
+        return classDecl.getSimpleNameString();
     }
 
     public List<MethodDeclNode> getMethods() {

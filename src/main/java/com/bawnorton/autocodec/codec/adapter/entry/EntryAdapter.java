@@ -29,7 +29,7 @@ public abstract class EntryAdapter extends ContextHolder {
         MemberReferenceNode selfFieldReference = MemberReferenceNode.builder(context)
                 .mode(MemberReferenceTree.ReferenceMode.INVOKE)
                 .name(field.getNameString())
-                .expression(enclosingClass.getName())
+                .expression(enclosingClass.getSimpleName())
                 .build();
 
         return MethodInvocationNode.builder(context)

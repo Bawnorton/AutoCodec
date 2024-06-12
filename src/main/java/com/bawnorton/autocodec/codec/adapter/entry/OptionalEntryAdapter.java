@@ -137,7 +137,7 @@ public abstract class OptionalEntryAdapter extends EntryAdapter {
             MemberReferenceNode defaultMethodMemberReference = MemberReferenceNode.builder(context)
                     .mode(MemberReferenceTree.ReferenceMode.INVOKE)
                     .name(refOrMethod.right().getName())
-                    .expression(enclosingClass.getName())
+                    .expression(enclosingClass.getSimpleName())
                     .build();
 
             return MethodInvocationNode.builder(context)

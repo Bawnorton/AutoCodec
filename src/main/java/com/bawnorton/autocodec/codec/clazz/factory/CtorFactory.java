@@ -15,7 +15,9 @@ public abstract class CtorFactory extends ContextHolder {
         super(context);
         this.classDeclNode = classDeclNode;
         if (!validate().get()) {
-            throw new IllegalArgumentException("CtorFactory of type " + this.getClass().getSimpleName() + " is not valid for " + classDeclNode.getName());
+            throw new IllegalArgumentException("CtorFactory of type %s is not valid for %s".formatted(
+                    this.getClass().getSimpleName(), classDeclNode.getSimpleNameString()
+            ));
         }
     }
 

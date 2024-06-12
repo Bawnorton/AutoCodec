@@ -165,4 +165,13 @@ public final class FieldInfo {
             return new AnnotationInfo(field.right().getAnnotation(annotationClass));
         }
     }
+
+    @Override
+    public String toString() {
+        if(field.isLeft()) {
+            return field.left().toString();
+        } else {
+            return field.right().toString();
+        }
+    }
 }

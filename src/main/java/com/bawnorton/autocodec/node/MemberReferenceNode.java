@@ -56,8 +56,12 @@ public final class MemberReferenceNode extends ExpressionNode {
             return expression(expression.getTree());
         }
 
+        public Builder expression(Name expression) {
+            return expression(context.treeMaker().Ident(expression));
+        }
+
         public Builder expression(String expression) {
-            return expression(context.treeMaker().Ident(context.names().fromString(expression)));
+            return expression(names().fromString(expression));
         }
 
         public Builder typeArg(JCTree.JCExpression typeArg) {

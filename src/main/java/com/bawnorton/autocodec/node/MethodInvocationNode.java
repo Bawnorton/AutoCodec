@@ -88,7 +88,7 @@ public final class MethodInvocationNode extends ExpressionNode {
         }
 
         public Builder typeArgument(ClassDeclNode typeArgument) {
-            return typeArgument(typeArgument.getName());
+            return typeArgument(typeArgument.getSimpleNameString());
         }
 
         public Builder typeArgument(Type.ClassType typeArgument) {

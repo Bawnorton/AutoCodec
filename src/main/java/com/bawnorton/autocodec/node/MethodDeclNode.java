@@ -39,8 +39,12 @@ public final class MethodDeclNode extends TreeNode {
         return isConstructor;
     }
 
-    public String getName() {
-        return methodDecl.getName().toString();
+    public String getNameString() {
+        return getName().toString();
+    }
+
+    public Name getName() {
+        return methodDecl.getName();
     }
 
     public Type getReturnType() {

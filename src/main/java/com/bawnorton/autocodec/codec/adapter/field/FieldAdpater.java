@@ -2,6 +2,7 @@ package com.bawnorton.autocodec.codec.adapter.field;
 
 import com.bawnorton.autocodec.context.ContextHolder;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.StatementNode;
 import com.bawnorton.autocodec.node.VariableDeclNode;
 import com.sun.tools.javac.code.Type;
@@ -9,18 +10,18 @@ import com.sun.tools.javac.util.List;
 import java.util.Collection;
 
 /**
- * Field adapters handle how the generated constructor handles field types<br>
+ * Field adapters handle how the generated constructor handles fieldInfo types<br>
  * For example, the {@link NormalFieldAdpater} maps the fields to parameters of the same type and assigns them simply:<br>
  * <pre>
  *     {@code
- *     private Field field;
+ *     private Field fieldInfo;
  *
- *     public ClassType(Field field) {
- *         this.field = field;
+ *     public ClassType(Field fieldInfo) {
+ *         this.fieldInfo = fieldInfo;
  *     }
  *     }
  * </pre>
- * On the other hand the {@link ListFieldAdpater} maps the fields to {@code List<T>} parameters and assigns the field through a
+ * On the other hand the {@link ListFieldAdpater} maps the fields to {@code List<T>} parameters and assigns the fieldInfo through a
  * copy-ctor or a no-arg ctor followed by a {@link List#addAll(Collection)} call depending on what is avaliable:
  * <pre>
  *     {@code
@@ -39,7 +40,7 @@ public abstract class FieldAdpater extends ContextHolder {
 
     public abstract Type getParameterType(Type fieldType);
 
-    public abstract VariableDeclNode getParameter(VariableDeclNode field);
+    public abstract VariableDeclNode getParameter(FieldInfo field);
 
-    public abstract List<StatementNode> createAssignmentStatements(VariableDeclNode field);
+    public abstract List<StatementNode> createAssignmentStatements(FieldInfo field);
 }

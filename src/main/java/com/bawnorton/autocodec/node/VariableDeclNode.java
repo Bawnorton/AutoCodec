@@ -31,8 +31,12 @@ public final class VariableDeclNode extends StatementNode {
         return variableDecl;
     }
 
-    public String getName() {
-        return variableDecl.name.toString();
+    public Name getName() {
+        return variableDecl.name;
+    }
+
+    public String getNameString() {
+        return getName().toString();
     }
 
     /**
@@ -70,8 +74,16 @@ public final class VariableDeclNode extends StatementNode {
         return variableDecl.vartype.type.tsym.name;
     }
 
+    public Symbol getOwner() {
+        return variableDecl.sym.owner;
+    }
+
     public Type.ClassType getBoxedType(Types types) {
         return (Type.ClassType) types.boxedTypeOrType(getType());
+    }
+
+    public void setName(Name name) {
+        getTree().name = name;
     }
 
     public boolean isStatic() {
@@ -83,7 +95,7 @@ public final class VariableDeclNode extends StatementNode {
     }
 
     public boolean canHaveGenerics() {
-        return variableDecl.vartype instanceof JCTree.JCTypeApply;
+        return variableDecl.vartype.type.isParameterized();
     }
 
     public boolean annotationPresent(Class<? extends Annotation> annotation) {
@@ -106,8 +118,8 @@ public final class VariableDeclNode extends StatementNode {
         Type thisType = getType();
         Type thatType = that.getType();
 
-        String thisName = getName();
-        String thatName = that.getName();
+        String thisName = getNameString();
+        String thatName = that.getNameString();
 
         return thisType.equals(thatType) && thisName.equals(thatName);
     }
@@ -116,7 +128,7 @@ public final class VariableDeclNode extends StatementNode {
         Type thisType = getType();
         Type thatType = that.type;
 
-        String thisName = getName();
+        String thisName = getNameString();
         String thatName = that.name.toString();
 
         return thisType.equals(thatType) && thisName.equals(thatName);

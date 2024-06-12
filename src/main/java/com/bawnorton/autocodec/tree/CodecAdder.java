@@ -2,12 +2,15 @@ package com.bawnorton.autocodec.tree;
 
 import com.bawnorton.autocodec.AutoCodec;
 import com.bawnorton.autocodec.Ignore;
+import com.bawnorton.autocodec.IncludeInChildren;
 import com.bawnorton.autocodec.codec.adapter.entry.EntryAdapter;
 import com.bawnorton.autocodec.codec.clazz.CodecableClass;
 import com.bawnorton.autocodec.codec.clazz.factory.CtorFactory;
 import com.bawnorton.autocodec.codec.entry.CodecEntry;
 import com.bawnorton.autocodec.codec.entry.CodecEntryField;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.helper.InheritanceHelper;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.*;
 import com.sun.source.tree.MemberReferenceTree;
 import com.sun.tools.javac.code.Flags;
@@ -76,19 +79,28 @@ public class CodecAdder extends NodeVisitor {
     private boolean cantAddCodecField(ClassDeclNode classDeclNode) {
         if(!classDeclNode.annotationPresent(AutoCodec.class)) return true;
 
-        List<VariableDeclNode> fields = classDeclNode.getFields();
-        if(fields.isEmpty()) return true;
+        List<FieldInfo> fields = classDeclNode.getFields().map(FieldInfo::new);
+        if(fields.isEmpty()) {
+            fields = InheritanceHelper.getAllParentsFields(holder.getContext(), classDeclNode)
+                    .stream()
+                    .filter(field -> field.getAnnotation(IncludeInChildren.class) != null)
+                    .map(FieldInfo::new)
+                    .collect(List.collector());
+            if(fields.isEmpty()) {
+                return true;
+            }
+        }
         if(fields.stream().filter(field -> {
             boolean ignore = field.annotationPresent(Ignore.class);
             boolean isStatic = field.isStatic();
             return !(ignore || isStatic);
         }).count() > MAX_FIELDS) {
-            holder.printError("Too many fields for codec generation. Max: " + MAX_FIELDS + ", Found: " + fields.size());
+            holder.printError("Too many fields for codec generation. Max: %d, Found: %d".formatted(MAX_FIELDS, fields.size()));
             return true;
         }
 
-        for (VariableDeclNode field : fields) {
-            if (!field.getName().equals(codecFieldName)) continue;
+        for (FieldInfo field : fields) {
+            if (!field.getName().contentEquals(codecFieldName)) continue;
 
             Type type = field.getType();
             if (type == null) continue;
@@ -111,7 +123,7 @@ public class CodecAdder extends NodeVisitor {
             }
 
             EntryAdapter entryAdapter = codecEntryField.getAdapter();
-            includedCodecs = includedCodecs.append(entryAdapter.createEntry(codecableClass.classDecl(), codecEntryField.field()));
+            includedCodecs = includedCodecs.append(entryAdapter.createEntry(codecableClass.classDecl(), codecEntryField.fieldInfo()));
         }
 
         FieldAccessNode instanceGroupReferenceNode = FieldAccessNode.builder(holder.getContext())
@@ -189,23 +201,28 @@ public class CodecAdder extends NodeVisitor {
     }
 
     private void createGetterIfMissing(CodecableClass codecableClass, CodecEntryField codecEntryField) {
-        VariableDeclNode fieldNode = codecEntryField.field();
-        MethodDeclNode fieldGetter = codecableClass.findMethod(fieldNode.getName(), fieldNode.getType());
+        FieldInfo fieldInfo = codecEntryField.fieldInfo();
+        MethodDeclNode fieldGetter = codecableClass.findMethod(fieldInfo.getNameString(), fieldInfo.getType());
         if(fieldGetter == null) {
-            VariableDeclNode field = codecEntryField.field();
-
-            ReturnNode returnFieldNode = ReturnNode.builder(holder.getContext())
-                    .expression(IdentNode.of(holder.getContext(), field.getName()))
-                    .build();
+            ReturnNode.Builder returnFieldNodeBuilder = ReturnNode.builder(holder.getContext());
+            if(fieldInfo.fromParent()) {
+                FieldAccessNode superFieldReference = FieldAccessNode.builder(holder.getContext())
+                        .selected("super")
+                        .name(fieldInfo.getName())
+                        .build();
+                returnFieldNodeBuilder.expression(superFieldReference);
+            } else {
+                returnFieldNodeBuilder.expression(IdentNode.of(holder.getContext(), fieldInfo.getName()));
+            }
 
             BlockNode fieldReturnBlock = BlockNode.builder(holder.getContext())
-                    .statement(returnFieldNode)
+                    .statement(returnFieldNodeBuilder.build())
                     .build();
 
             MethodDeclNode getter = MethodDeclNode.builder(holder.getContext())
                     .modifiers(Flags.PRIVATE)
-                    .name(field.getName())
-                    .returnType(field.getVartype())
+                    .name(fieldInfo.getName())
+                    .returnType(fieldInfo.getVartype(holder.getContext()))
                     .body(fieldReturnBlock)
                     .build();
 

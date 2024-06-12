@@ -3,6 +3,7 @@ package com.bawnorton.autocodec.codec.clazz.factory;
 import com.bawnorton.autocodec.Ignore;
 import com.bawnorton.autocodec.codec.entry.CodecEntryField;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.*;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.util.List;
@@ -50,11 +51,11 @@ public final class RecordCtorFactory extends CtorFactory {
     public MethodDeclNode createCtorForFields(List<CodecEntryField> codecEntryFields) {
         List<VariableDeclNode> parameters = List.nil();
         for (CodecEntryField codecEntryField : codecEntryFields) {
-            VariableDeclNode field = codecEntryField.field();
+            FieldInfo fieldInfo = codecEntryField.fieldInfo();
             VariableDeclNode parameter = VariableDeclNode.builder(context)
                     .modifiers(Flags.PARAMETER)
-                    .name(field.getName())
-                    .type(field.getType().tsym.name)
+                    .name(fieldInfo.getNameString())
+                    .type(fieldInfo.getType().tsym.name)
                     .build();
             parameters = parameters.append(parameter);
         }

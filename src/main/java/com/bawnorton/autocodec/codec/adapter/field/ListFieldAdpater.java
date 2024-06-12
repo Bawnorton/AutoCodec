@@ -2,9 +2,9 @@ package com.bawnorton.autocodec.codec.adapter.field;
 
 import com.bawnorton.autocodec.context.ProcessingContext;
 import com.bawnorton.autocodec.helper.GenericHelper;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.*;
-import com.bawnorton.autocodec.util.FieldType;
-import com.bawnorton.autocodec.util.TypeUtils;
+import com.bawnorton.autocodec.helper.TypeHelper;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -17,11 +17,11 @@ public final class ListFieldAdpater extends FieldAdpater {
 
     @Override
     public Type getParameterType(Type fieldType) {
-        return TypeUtils.findType(context, fieldType, java.util.List.class);
+        return TypeHelper.findType(context, fieldType, java.util.List.class);
     }
 
     @Override
-    public VariableDeclNode getParameter(VariableDeclNode field) {
+    public VariableDeclNode getParameter(FieldInfo field) {
         Type generic = GenericHelper.getFirstGenericOfClassInParentsOrThrow(context, field.getType(), java.util.List.class);
         return VariableDeclNode.builder(context)
                 .modifiers(Flags.PARAMETER)
@@ -32,16 +32,16 @@ public final class ListFieldAdpater extends FieldAdpater {
     }
 
     @Override
-    public List<StatementNode> createAssignmentStatements(VariableDeclNode field) {
-        // this.field
+    public List<StatementNode> createAssignmentStatements(FieldInfo field) {
+        // this.fieldInfo
         FieldAccessNode fieldReference = FieldAccessNode.builder(context)
                 .selected(IdentNode.of(context, "this"))
                 .name(field.getName())
                 .build();
 
-        // field is "List" exactly
+        // fieldInfo is "List" exactly
         Type fieldType = field.getType();
-        if (TypeUtils.is(fieldType, java.util.List.class)) {
+        if (TypeHelper.is(fieldType, java.util.List.class)) {
             return List.of(AssignNode.builder(context)
                     .lhs(fieldReference)
                     .rhs(field.getName())
@@ -74,7 +74,7 @@ public final class ListFieldAdpater extends FieldAdpater {
 
                 Symbol.VarSymbol ctorParam = ctor.params().head;
                 Type paramType = ctorParam.type;
-                if (!TypeUtils.isChildOf(context, paramType, java.util.List.class)) {
+                if (!TypeHelper.isChildOf(context, paramType, java.util.List.class)) {
                     continue;
                 }
 
@@ -91,14 +91,14 @@ public final class ListFieldAdpater extends FieldAdpater {
         }
     }
 
-    private List<StatementNode> createCopyCtorAssignment(VariableDeclNode field, FieldAccessNode fieldReference) {
-        // new FieldType*(field);
+    private List<StatementNode> createCopyCtorAssignment(FieldInfo field, FieldAccessNode fieldReference) {
+        // new FieldType*(fieldInfo);
         NewClassNode newFieldType = NewClassNode.builder(context)
                 .clazz(createNewFieldTypeClazz(field))
                 .arg(field.getName())
                 .build();
 
-        // this.field = new FieldType*(field);
+        // this.fieldInfo = new FieldType*(fieldInfo);
         return List.of(AssignNode.builder(context)
                 .lhs(fieldReference)
                 .rhs(newFieldType)
@@ -106,7 +106,7 @@ public final class ListFieldAdpater extends FieldAdpater {
                 .toStatement(treeMaker()));
     }
 
-    private List<StatementNode> createAddAllAssignment(VariableDeclNode field, FieldAccessNode fieldReference) {
+    private List<StatementNode> createAddAllAssignment(FieldInfo field, FieldAccessNode fieldReference) {
         List<StatementNode> statements = List.nil();
 
         // new FieldType*();
@@ -114,7 +114,7 @@ public final class ListFieldAdpater extends FieldAdpater {
                 .clazz(createNewFieldTypeClazz(field))
                 .build();
 
-        // this.field = new FieldType*();
+        // this.fieldInfo = new FieldType*();
         AssignNode fieldInit = AssignNode.builder(context)
                 .lhs(fieldReference)
                 .rhs(newFieldType)
@@ -122,13 +122,13 @@ public final class ListFieldAdpater extends FieldAdpater {
 
         statements = statements.append(fieldInit.toStatement(treeMaker()));
 
-        // this.field.addAll
+        // this.fieldInfo.addAll
         FieldAccessNode addAllReference = FieldAccessNode.builder(context)
                 .selected(fieldReference)
                 .name("addAll")
                 .build();
 
-        // this.field.addAll(field);
+        // this.fieldInfo.addAll(fieldInfo);
         MethodInvocationNode addAllInvocation = MethodInvocationNode.builder(context)
                 .methodSelect(addAllReference)
                 .argument(field.getName())
@@ -137,7 +137,7 @@ public final class ListFieldAdpater extends FieldAdpater {
         return statements.append(addAllInvocation.toStatement(treeMaker()));
     }
 
-    private ExpressionNode createNewFieldTypeClazz(VariableDeclNode field) {
+    private ExpressionNode createNewFieldTypeClazz(FieldInfo field) {
         List<Type> generics = field.getGenericTypes();
         ExpressionNode newFieldTypeClazz;
         if (generics == null) {

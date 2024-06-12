@@ -38,6 +38,10 @@ public class ExpressionParser {
             return new MemberReferenceNode(memberReference);
         } else if (expression instanceof JCTree.JCNewClass newClass) {
             return new NewClassNode(newClass);
+        } else if (expression instanceof JCTree.JCPrimitiveTypeTree primitiveType) {
+            return new PrimitiveTypeTreeNode(primitiveType);
+        } else if (expression instanceof JCTree.JCTypeApply typeApply) {
+            return new TypeApplyNode(typeApply);
         }
         throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
     }

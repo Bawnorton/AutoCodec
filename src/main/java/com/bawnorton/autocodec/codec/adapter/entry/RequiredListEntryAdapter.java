@@ -3,6 +3,7 @@ package com.bawnorton.autocodec.codec.adapter.entry;
 import com.bawnorton.autocodec.codec.CodecLookup;
 import com.bawnorton.autocodec.context.ProcessingContext;
 import com.bawnorton.autocodec.helper.GenericHelper;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.ClassDeclNode;
 import com.bawnorton.autocodec.node.FieldAccessNode;
 import com.bawnorton.autocodec.node.MethodInvocationNode;
@@ -15,7 +16,7 @@ public final class RequiredListEntryAdapter extends RequiredEntryAdapter {
     }
 
     @Override
-    protected MethodInvocationNode requiredInvocation(ClassDeclNode enclosingClass, VariableDeclNode field) {
+    protected MethodInvocationNode requiredInvocation(ClassDeclNode enclosingClass, FieldInfo field) {
         // Codec.TYPE.listOf()
         MethodInvocationNode listOfInvocation = createListOfInvocation(field);
         // fieldOf("fieldName")
@@ -24,7 +25,7 @@ public final class RequiredListEntryAdapter extends RequiredEntryAdapter {
         return getterInvocation(fieldOfInvocation, enclosingClass, field);
     }
 
-    private MethodInvocationNode createListOfInvocation(VariableDeclNode field) {
+    private MethodInvocationNode createListOfInvocation(FieldInfo field) {
         FieldAccessNode listOfReference = createListOfReference(field);
 
         return MethodInvocationNode.builder(context)
@@ -32,7 +33,7 @@ public final class RequiredListEntryAdapter extends RequiredEntryAdapter {
                 .build();
     }
 
-    private FieldAccessNode createListOfReference(VariableDeclNode field) {
+    private FieldAccessNode createListOfReference(FieldInfo field) {
         Type generic = GenericHelper.getFirstGenericOfClassInParentsOrThrow(context, field.getType(), java.util.List.class);
 
         return FieldAccessNode.builder(context)

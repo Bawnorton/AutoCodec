@@ -3,11 +3,11 @@ package com.bawnorton.autocodec.codec.adapter.entry;
 import com.bawnorton.autocodec.codec.entry.CodecEntry;
 import com.bawnorton.autocodec.context.ContextHolder;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.ClassDeclNode;
 import com.bawnorton.autocodec.node.FieldAccessNode;
 import com.bawnorton.autocodec.node.MemberReferenceNode;
 import com.bawnorton.autocodec.node.MethodInvocationNode;
-import com.bawnorton.autocodec.node.VariableDeclNode;
 import com.sun.source.tree.MemberReferenceTree;
 
 public abstract class EntryAdapter extends ContextHolder {
@@ -15,12 +15,12 @@ public abstract class EntryAdapter extends ContextHolder {
         super(context);
     }
 
-    public abstract CodecEntry createEntry(ClassDeclNode enclosingClass, VariableDeclNode field);
+    public abstract CodecEntry createEntry(ClassDeclNode enclosingClass, FieldInfo field);
 
     /**
      * {@code [CodecDefintion].forGetter(Class::fieldName)}
      */
-    protected MethodInvocationNode getterInvocation(MethodInvocationNode supplier, ClassDeclNode enclosingClass, VariableDeclNode field) {
+    protected MethodInvocationNode getterInvocation(MethodInvocationNode supplier, ClassDeclNode enclosingClass, FieldInfo field) {
         FieldAccessNode forGetterReference = FieldAccessNode.builder(context)
                 .selected(supplier)
                 .name("forGetter")
@@ -28,7 +28,7 @@ public abstract class EntryAdapter extends ContextHolder {
 
         MemberReferenceNode selfFieldReference = MemberReferenceNode.builder(context)
                 .mode(MemberReferenceTree.ReferenceMode.INVOKE)
-                .name(field.getName())
+                .name(field.getNameString())
                 .expression(enclosingClass.getName())
                 .build();
 

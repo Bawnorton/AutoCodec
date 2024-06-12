@@ -1,4 +1,4 @@
-package com.bawnorton.autocodec.util;
+package com.bawnorton.autocodec.helper;
 
 import com.bawnorton.autocodec.context.ProcessingContext;
 import com.google.common.collect.HashBasedTable;
@@ -9,7 +9,7 @@ import com.sun.tools.javac.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class TypeUtils {
+public final class TypeHelper {
     private static final Table<Type, Type, Type> typeCache = HashBasedTable.create();
 
     /**
@@ -57,7 +57,7 @@ public final class TypeUtils {
     }
 
     /**
-     * Checks if a {@link Type} is a {@link Class}, not to be confused with {@link TypeUtils#isOf}
+     * Checks if a {@link Type} is a {@link Class}, not to be confused with {@link TypeHelper#isOf}
      */
     public static boolean is(Type type, Class<?> clazz) {
         if(type == Type.noType) return false;
@@ -111,7 +111,7 @@ public final class TypeUtils {
     }
 
     /**
-     * Determine if a {@link Type} is a child of {@code parentClass}. Not to be confused with {@link TypeUtils#isOf}
+     * Determine if a {@link Type} is a child of {@code parentClass}. Not to be confused with {@link TypeHelper#isOf}
      *
      * @param childType   The childType at the bottom of the heirachy to search up from
      * @param parentClass The class to look for in the heirachy

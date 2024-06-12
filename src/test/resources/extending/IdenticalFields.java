@@ -1,6 +1,7 @@
 package extending;
 
 import com.bawnorton.autocodec.AutoCodec;
+import com.bawnorton.autocodec.IncludeInChildren;
 
 @AutoCodec
 public class IdenticalFields extends IdenticalFieldsParent {
@@ -9,6 +10,8 @@ public class IdenticalFields extends IdenticalFieldsParent {
 }
 
 class IdenticalFieldsParent {
-    private String string;
-    private Integer integer;
+    @IncludeInChildren
+    protected String string;
+    @IncludeInChildren
+    protected Integer integer;
 }

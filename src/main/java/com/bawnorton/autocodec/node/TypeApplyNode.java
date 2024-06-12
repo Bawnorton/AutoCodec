@@ -2,6 +2,7 @@ package com.bawnorton.autocodec.node;
 
 import com.bawnorton.autocodec.context.ContextHolder;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
@@ -61,6 +62,11 @@ public final class TypeApplyNode extends ExpressionNode {
 
         public Builder typeArg(String typeArg) {
             return typeArg(context.names().fromString(typeArg));
+        }
+
+        public Builder typeArgs(List<String> typeArgs) {
+            typeArgs.forEach(this::typeArg);
+            return this;
         }
 
         public TypeApplyNode build() {

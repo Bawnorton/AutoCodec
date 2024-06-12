@@ -17,6 +17,7 @@ public final class AnnotationNode extends ExpressionNode {
         for (JCTree.JCExpression arg : annotation.args) {
             if (!(arg instanceof JCTree.JCAssign assign)) continue;
             if (!(assign.lhs instanceof JCTree.JCIdent ident)) continue;
+
             JCTree.JCExpression value = assign.rhs;
             args.put(ident.name.toString(), ExpressionParser.asExpressionNode(value));
         }

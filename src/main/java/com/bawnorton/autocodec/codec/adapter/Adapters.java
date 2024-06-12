@@ -1,7 +1,7 @@
 package com.bawnorton.autocodec.codec.adapter;
 
 import com.bawnorton.autocodec.context.ProcessingContext;
-import com.bawnorton.autocodec.util.TypeUtils;
+import com.bawnorton.autocodec.helper.TypeHelper;
 import com.sun.tools.javac.code.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +35,7 @@ public class Adapters<T> {
                 return defaultAdapter;
             }
 
-            throw new IllegalArgumentException("Class \"" + type.tsym.toString() + "\" does not have a registered field adpater");
+            throw new IllegalArgumentException("Class \"" + type.tsym.toString() + "\" does not have a registered fieldInfo adpater");
         }
         return adapters.get(type);
     }
@@ -48,7 +48,7 @@ public class Adapters<T> {
         return inferredAdapters.computeIfAbsent(type, childType -> {
             Set<Type> registeredAdapterTypes = adapters.keySet();
             for (Type registeredAdapterType : registeredAdapterTypes) {
-                if(TypeUtils.isOf(context, type, registeredAdapterType)) {
+                if(TypeHelper.isOf(context, type, registeredAdapterType)) {
                     return adapters.get(registeredAdapterType);
                 }
             }

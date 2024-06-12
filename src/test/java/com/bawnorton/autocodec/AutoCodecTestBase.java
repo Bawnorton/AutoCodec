@@ -60,6 +60,6 @@ public abstract class AutoCodecTestBase {
         classNode.fields.stream()
                 .filter(fieldNode -> fieldNode.name.equals("CODEC"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Expected `CODEC` field"));
+                .orElseThrow(() -> new AssertionError("Expected `CODEC` fieldInfo"));
     }
 }

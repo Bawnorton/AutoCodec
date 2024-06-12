@@ -1,6 +1,8 @@
 package extending;
 
 import com.bawnorton.autocodec.AutoCodec;
+import com.bawnorton.autocodec.IncludeInChildren;
+import java.util.List;
 
 @AutoCodec
 public class PartialFields extends PartialFieldsParent {
@@ -15,10 +17,11 @@ public class PartialFields extends PartialFieldsParent {
 }
 
 class PartialFieldsParent {
-    private Integer i1;
+    @IncludeInChildren
+    protected List<Integer> i1;
     private String s1;
 
-    public PartialFieldsParent(Integer i1, String s1) {
+    public PartialFieldsParent(List<Integer> i1, String s1) {
         this.i1 = i1;
         this.s1 = s1;
     }

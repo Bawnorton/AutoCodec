@@ -1,17 +1,21 @@
 package com.bawnorton.autocodec.codec.clazz;
 
 import com.bawnorton.autocodec.Ignore;
+import com.bawnorton.autocodec.IncludeInChildren;
 import com.bawnorton.autocodec.codec.clazz.factory.ClassCtorFactory;
 import com.bawnorton.autocodec.codec.clazz.factory.CtorFactory;
 import com.bawnorton.autocodec.codec.clazz.factory.RecordCtorFactory;
 import com.bawnorton.autocodec.codec.entry.CodecEntryField;
 import com.bawnorton.autocodec.context.ContextHolder;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.helper.InheritanceHelper;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.ClassDeclNode;
 import com.bawnorton.autocodec.node.MethodDeclNode;
 import com.bawnorton.autocodec.node.VariableDeclNode;
 import com.bawnorton.autocodec.node.container.FieldContainer;
 import com.bawnorton.autocodec.node.container.MethodContainer;
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.util.List;
 
 public final class CodecableClass extends ContextHolder implements MethodContainer, FieldContainer {
@@ -31,7 +35,16 @@ public final class CodecableClass extends ContextHolder implements MethodContain
             if (field.isStatic()) continue;
             if (field.annotationPresent(Ignore.class)) continue;
 
-            entryFields = entryFields.append(new CodecEntryField(context, field));
+            entryFields = entryFields.append(new CodecEntryField(context, new FieldInfo(field)));
+        }
+
+        List<Symbol.VarSymbol> parentFields = InheritanceHelper.getAllParentsFields(context, classDecl)
+                .stream()
+                .filter(field -> field.getAnnotation(IncludeInChildren.class) != null)
+                .collect(List.collector());
+
+        for (Symbol.VarSymbol parentField : parentFields) {
+            entryFields = entryFields.append(new CodecEntryField(context, new FieldInfo(parentField)));
         }
 
         return entryFields;

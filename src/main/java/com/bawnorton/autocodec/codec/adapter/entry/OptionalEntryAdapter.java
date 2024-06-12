@@ -2,6 +2,8 @@ package com.bawnorton.autocodec.codec.adapter.entry;
 
 import com.bawnorton.autocodec.codec.entry.CodecEntry;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.info.AnnotationInfo;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.*;
 import com.bawnorton.autocodec.node.parser.ExpressionParser;
 import com.bawnorton.autocodec.util.Or;
@@ -10,25 +12,25 @@ import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
 
 public abstract class OptionalEntryAdapter extends EntryAdapter {
-    protected final AnnotationNode optional;
+    protected final AnnotationInfo optional;
 
-    protected OptionalEntryAdapter(ProcessingContext context, AnnotationNode optional) {
+    protected OptionalEntryAdapter(ProcessingContext context, AnnotationInfo optional) {
         super(context);
         this.optional = optional;
     }
 
     @Override
-    public CodecEntry createEntry(ClassDeclNode enclosingClass, VariableDeclNode field) {
+    public CodecEntry createEntry(ClassDeclNode enclosingClass, FieldInfo field) {
         MethodInvocationNode optionalInvocation = optionalInvocation(enclosingClass, field);
         return new CodecEntry(field, optionalInvocation);
     }
 
-    protected MethodInvocationNode optionalInvocation(ClassDeclNode enclosingClass, VariableDeclNode field) {
+    protected MethodInvocationNode optionalInvocation(ClassDeclNode enclosingClass, FieldInfo field) {
         if (!optional.hasValue()) {
             return optionalInvocationWithDefault(enclosingClass, field);
         }
 
-        String optionalValue = optional.getValue(LiteralNode.class).getValue(String.class);
+        String optionalValue = optional.getLiteralValue(String.class);
         MethodDeclNode defaultMethod = tryFindMethodReference(optionalValue, enclosingClass, field);
         if(defaultMethod == null) {
             return optionalInvocationFromExpression(parseOptionalValue(optionalValue), enclosingClass, field);
@@ -44,29 +46,29 @@ public abstract class OptionalEntryAdapter extends EntryAdapter {
         return ExpressionParser.parseExpression(context, optionalValue);
     }
 
-    private MethodDeclNode tryFindMethodReference(String optionalValue, ClassDeclNode enclosingClass, VariableDeclNode field) {
+    private MethodDeclNode tryFindMethodReference(String optionalValue, ClassDeclNode enclosingClass, FieldInfo field) {
         Type fieldType = field.getType();
         return enclosingClass.findMethod(optionalValue, fieldType);
     }
 
-    private MethodInvocationNode optionalInvocationWithDefault(ClassDeclNode enclosingClass, VariableDeclNode field) {
+    private MethodInvocationNode optionalInvocationWithDefault(ClassDeclNode enclosingClass, FieldInfo field) {
         return optionalInvocationFromExpression(LiteralNode.defaultLiteral(context, field.getType()), enclosingClass, field);
     }
 
-    private MethodInvocationNode optionalInvocationFromExpression(ExpressionNode expression, ClassDeclNode enclosingClass, VariableDeclNode field) {
+    private MethodInvocationNode optionalInvocationFromExpression(ExpressionNode expression, ClassDeclNode enclosingClass, FieldInfo field) {
         MethodInvocationNode optionalInvocation = createOptionalInvocation(field);
         return createXmapper(optionalInvocation, enclosingClass, field, Or.left(expression));
     }
 
-    private MethodInvocationNode optionalInvocationFromMethodReference(MethodDeclNode defaultMethod, ClassDeclNode enclosingClass, VariableDeclNode field) {
+    private MethodInvocationNode optionalInvocationFromMethodReference(MethodDeclNode defaultMethod, ClassDeclNode enclosingClass, FieldInfo field) {
         MethodInvocationNode optionalInvocation = createOptionalInvocation(field);
         return createXmapper(optionalInvocation, enclosingClass, field, Or.right(defaultMethod));
     }
 
-    protected abstract MethodInvocationNode createOptionalInvocation(VariableDeclNode field);
+    protected abstract MethodInvocationNode createOptionalInvocation(FieldInfo field);
 
-    protected MethodInvocationNode createXmapper(MethodInvocationNode optionalFieldOfInvocation, ClassDeclNode enclosingClass, VariableDeclNode field, Or<ExpressionNode, MethodDeclNode> refOrMethod) {
-        String optionalFieldName = field.getName() + "Optional";
+    protected MethodInvocationNode createXmapper(MethodInvocationNode optionalFieldOfInvocation, ClassDeclNode enclosingClass, FieldInfo field, Or<ExpressionNode, MethodDeclNode> refOrMethod) {
+        String optionalFieldName = field.getNameString() + "Optional";
         // xmap
         FieldAccessNode xmapReference = createXmapReference(optionalFieldOfInvocation);
         // (Optional<FieldType> fieldNameOptional)
@@ -83,7 +85,7 @@ public abstract class OptionalEntryAdapter extends EntryAdapter {
         return getterInvocation(xmapInvocation, enclosingClass, field);
     }
 
-    protected MethodInvocationNode createOptionalFieldOfInvocation(ExpressionNode codecExpression, VariableDeclNode field) {
+    protected MethodInvocationNode createOptionalFieldOfInvocation(ExpressionNode codecExpression, FieldInfo field) {
         FieldAccessNode optionalFieldOfReference = FieldAccessNode.builder(context)
                 .selected(codecExpression)
                 .name("optionalFieldOf")
@@ -91,7 +93,7 @@ public abstract class OptionalEntryAdapter extends EntryAdapter {
 
         return MethodInvocationNode.builder(context)
                 .methodSelect(optionalFieldOfReference)
-                .argument(LiteralNode.of(context, field.getName()))
+                .argument(LiteralNode.of(context, field.getNameString()))
                 .build();
     }
 
@@ -102,7 +104,7 @@ public abstract class OptionalEntryAdapter extends EntryAdapter {
                 .build();
     }
 
-    protected VariableDeclNode createFieldOptionalParam(String optionalFieldName, VariableDeclNode field) {
+    protected VariableDeclNode createFieldOptionalParam(String optionalFieldName, FieldInfo field) {
         VariableDeclNode.Builder fieldBuilder = VariableDeclNode.builder(context)
                 .modifiers(Flags.PARAMETER)
                 .name(optionalFieldName)
@@ -110,7 +112,7 @@ public abstract class OptionalEntryAdapter extends EntryAdapter {
         if (field.isPrimitive()) {
             fieldBuilder.genericParam(field.getBoxedType(types()));
         } else {
-            fieldBuilder.genericParam(field.getVartype());
+            fieldBuilder.genericParam(field.getVartype(context));
         }
         return fieldBuilder.build();
     }

@@ -8,6 +8,11 @@ public class ExtendingTests extends AutoCodecTestBase {
     }
 
     @Test
+    public void testDeepInclusion() {
+        extendingTest("DeepInclusion");
+    }
+
+    @Test
     public void testExtendingDifferentFields() {
         extendingTest("DifferentFields");
     }

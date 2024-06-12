@@ -10,7 +10,7 @@ import com.bawnorton.autocodec.codec.adapter.field.NormalFieldAdpater;
 import com.bawnorton.autocodec.context.ProcessingContext;
 import com.bawnorton.autocodec.tree.CodecAdder;
 import com.bawnorton.autocodec.tree.PositionUpdater;
-import com.bawnorton.autocodec.util.TypeUtils;
+import com.bawnorton.autocodec.helper.TypeHelper;
 import com.google.auto.service.AutoService;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symtab;
@@ -87,8 +87,8 @@ public class AutoCodecProcessor extends AbstractProcessor {
     }
 
     private void initAdapters() {
-        Type listType = TypeUtils.typeOf(processingContext, List.class);
-        Type mapType = TypeUtils.typeOf(processingContext, Map.class);
+        Type listType = TypeHelper.typeOf(processingContext, List.class);
+        Type mapType = TypeHelper.typeOf(processingContext, Map.class);
 
         Adapters<RequiredEntryAdapterFactory> requiredEntryAdapters = processingContext.requiredEntryAdapters();
         requiredEntryAdapters.setDefaultAdapterFactory(RequiredNormalEntryAdapter::new);

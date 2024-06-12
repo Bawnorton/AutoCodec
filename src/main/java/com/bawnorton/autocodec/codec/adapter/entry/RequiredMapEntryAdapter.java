@@ -2,6 +2,7 @@ package com.bawnorton.autocodec.codec.adapter.entry;
 
 import com.bawnorton.autocodec.codec.CodecLookup;
 import com.bawnorton.autocodec.context.ProcessingContext;
+import com.bawnorton.autocodec.info.FieldInfo;
 import com.bawnorton.autocodec.node.ClassDeclNode;
 import com.bawnorton.autocodec.node.FieldAccessNode;
 import com.bawnorton.autocodec.node.MethodInvocationNode;
@@ -15,7 +16,7 @@ public final class RequiredMapEntryAdapter extends RequiredEntryAdapter {
     }
 
     @Override
-    protected MethodInvocationNode requiredInvocation(ClassDeclNode enclosingClass, VariableDeclNode field) {
+    protected MethodInvocationNode requiredInvocation(ClassDeclNode enclosingClass, FieldInfo field) {
         // Codec.unboundedMap(TYPE_A, TYPE_B)
         MethodInvocationNode unboundedMapInvocation = createUnboundedMapInvocation(field);
         // fieldOf("fieldName")
@@ -24,7 +25,7 @@ public final class RequiredMapEntryAdapter extends RequiredEntryAdapter {
         return getterInvocation(fieldOfInvocation, enclosingClass, field);
     }
 
-    private MethodInvocationNode createUnboundedMapInvocation(VariableDeclNode field) {
+    private MethodInvocationNode createUnboundedMapInvocation(FieldInfo field) {
         FieldAccessNode unboundedMapReference = createUnboundedMapReference();
         List<Type> generics = field.getGenericTypes();
         Type keyType = generics.head;

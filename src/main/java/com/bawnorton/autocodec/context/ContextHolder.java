@@ -1,13 +1,13 @@
 package com.bawnorton.autocodec.context;
 
 import com.bawnorton.autocodec.codec.adapter.Adapters;
-import com.bawnorton.autocodec.codec.adapter.entry.RequiredEntryAdapterFactory;
 import com.bawnorton.autocodec.codec.adapter.entry.OptionalEntryAdapter;
 import com.bawnorton.autocodec.codec.adapter.entry.OptionalEntryAdapterFactory;
 import com.bawnorton.autocodec.codec.adapter.entry.RequiredEntryAdapter;
+import com.bawnorton.autocodec.codec.adapter.entry.RequiredEntryAdapterFactory;
 import com.bawnorton.autocodec.codec.adapter.field.FieldAdapterFactory;
 import com.bawnorton.autocodec.codec.adapter.field.FieldAdpater;
-import com.bawnorton.autocodec.node.AnnotationNode;
+import com.bawnorton.autocodec.info.AnnotationInfo;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.code.Type;
@@ -82,7 +82,7 @@ public class ContextHolder {
         return context.optionalEntryAdapters();
     }
 
-    public OptionalEntryAdapter optionalEntryAdapter(Type optionalType, AnnotationNode optional) {
+    public OptionalEntryAdapter optionalEntryAdapter(Type optionalType, AnnotationInfo optional) {
         return optionalEntryAdapters().getAdapterFactory(context, optionalType).getAdapter(context, optional);
     }
 

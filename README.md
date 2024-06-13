@@ -6,8 +6,11 @@ Automatically generate Codec fields for annotated classes via AST transformation
 - [x] All fields
 - [x] Ignoring fields
 - [x] Optional fields
-- [ ] List/Map fields
+- [x] Inheritance
+- [x] List fields
+- [ ] Map fields
 - [ ] Xmapping fields
+- [x] Field adapters
 - [ ] Field types with custom codecs / auto-codecs
 - [x] Generating getters
 - [x] Generating ctors

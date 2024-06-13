@@ -12,7 +12,7 @@ public interface FieldContainer {
     default VariableDeclNode findField(String name, Type fieldType) {
         List<VariableDeclNode> fields = getFields();
         for (VariableDeclNode field : fields) {
-            if (!field.getName().equals(name)) continue;
+            if (!field.getName().contentEquals(name)) continue;
             if (!field.getType().equals(fieldType)) continue;
             return field;
         }

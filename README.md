@@ -1,3 +1,5 @@
+Currently on-pause while I am on vacation and updating my other projects to 1.21
+
 # AutoCodec
 
 Automatically generate Codec fields for annotated classes via AST transformation.
